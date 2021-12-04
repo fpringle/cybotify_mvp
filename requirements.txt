@@ -1,0 +1,3 @@
+spotipy
+psycopg2
+django
