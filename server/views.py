@@ -1,3 +1,111 @@
+import datetime
+import logging
+
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
-# Create your views here.
+from spotipy import Spotify
+
+from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
+from .spotify_client_info import get_spotify_oauth
+
+scopes = [
+    "user-read-private",
+    "user-read-email",
+    "user-library-modify",
+    "user-follow-read",
+    "user-top-read",
+    "playlist-modify-private",
+    "playlist-modify-public",
+    "playlist-read-collaborative",
+]
+
+
+logger = logging.getLogger(__name__)
+
+def new_user(request):
+    logger.info("Request for new user")
+    reg = RegistrationState()
+    reg.save()
+    logger.info("Generated state string: %s", reg.state_string)
+    oauth = get_spotify_oauth(scopes)
+    url = oauth.get_authorize_url(state=reg.state_string)
+    logger.info("Redirecting user to: %s", url)
+    return HttpResponseRedirect(url)
+
+
+def handle_spotify_auth_response(request):
+    logger.info("Response from spotify auth")
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+
+    if (not code) or (not state):
+        # handle error
+        pass
+
+    logger.info("Auth code: %s", code)
+    logger.info("State string: %s", state)
+
+    query = RegistrationState.objects.filter(state_string = state)
+    length = query.count()
+    if length == 0:
+        # handle bad state string
+        pass
+    elif length > 1:
+        # handle duplicate state string
+        pass
+
+    oauth = get_spotify_oauth(scopes)
+
+    logger.info("Getting access token from Spotify API")
+
+    token_info = oauth.get_access_token(code)
+
+    access_token = token_info["access_token"]
+    refresh_token = token_info["refresh_token"]
+    expires_at = datetime.datetime.fromtimestamp(
+        token_info["expires_at"], datetime.timezone.utc
+    )
+
+    logger.info("Access token: %s", access_token)
+    logger.info("Refresh token: %s", refresh_token)
+    logger.info("Expires at: %s", expires_at)
+
+    sp = Spotify(auth=access_token)
+    user_info = sp.current_user()
+
+    spotify_id = user_info["id"]
+
+    if SpotifyUser.objects.filter(spotify_id=spotify_id).exists():
+        # user already exists
+        return HttpResponse("User already exists!")
+
+    email = user_info.get("email", "")
+    name = user_info.get("display_name", "")
+    first_name, *rest = name.strip().split()
+    last_name = " ".join(rest)
+
+    logger.info("User name: %s %s", first_name, last_name)
+    logger.info("User email: %s", email)
+    logger.info("User Spotify ID: %s", spotify_id)
+
+    user = User.objects.create_user(spotify_id, email)
+    user.first_name = first_name
+    user.last_name = last_name
+    user.save()
+
+    su = SpotifyUser(user=user, spotify_id=spotify_id)
+    su.save()
+
+    cred = SpotifyUserCredentials.objects.create(
+        user=user,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_at=expires_at
+    )
+    cred.save()
+
+    reg = query.get()
+    reg.delete()
+
+    return HttpResponse("Awesome!")

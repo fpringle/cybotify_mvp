@@ -1,3 +1,4 @@
 spotipy
 psycopg2
 django
+django-environ
