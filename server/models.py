@@ -84,7 +84,7 @@ class Track(models.Model):
         return f"(name={self.name}, artists={self.artists}, spotifyID={self.spotify_id})"
 
 class TrackFeatures(models.Model):
-    track = models.OneToOneField(Track, on_delete=models.CASCADE, primary_key=True)
+    track = models.OneToOneField(Track, on_delete=models.CASCADE, primary_key=True, related_name="track_features")
 
     class Mode(models.IntegerChoices):
         MAJOR = 1
