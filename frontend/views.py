@@ -32,7 +32,11 @@ def create_password(request):
     print("post create pass")
     user_id = request.user.pk
     user = User.objects.filter(pk=user_id).get()
+
+    username = request.POST.get("username")
     password = request.POST.get("password")
+
+    user.username = username
     user.password = make_password(password)
     user.save()
     login(request, user)

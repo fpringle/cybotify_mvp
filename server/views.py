@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from django.contrib.auth import login
+from django.contrib.auth.hashers import is_password_usable
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
@@ -69,9 +70,11 @@ def handle_spotify_auth_response(request):
     user_info = sp.current_user()
 
     spotify_id = user_info["id"]
+    print("spotify id:", spotify_id)
 
     if SpotifyUser.objects.filter(spotify_id=spotify_id).exists():
         # user already exists
+        reg.delete()
         return HttpResponse("User already exists!")
 
     email = user_info.get("email", "")
@@ -86,7 +89,8 @@ def handle_spotify_auth_response(request):
     if reg.user:
         user = reg.user
     else:
-        user = User.objects.create_user(spotify_id, email)
+        print("create new user")
+        user = User.objects.create_user(username=spotify_id, email=email)
         user.first_name = first_name
         user.last_name = last_name
         user.save()
@@ -105,7 +109,6 @@ def handle_spotify_auth_response(request):
     reg.delete()
 
     login(request, user)
-
-    if not (hasattr(user, "password") and user.password):
+    if not (hasattr(user, "password") and is_password_usable(user.password)):
         return HttpResponseRedirect('/user/new/create_password/')
     return HttpResponseRedirect('/')
