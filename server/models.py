@@ -11,6 +11,7 @@ from .spotify_client_info import (
     get_spotify_user_client,
     get_all_playlists,
     get_all_playlist_tracks,
+    get_all_track_features,
     get_spotify_client,
     scopes,
 )
@@ -60,7 +61,7 @@ class SpotifyUser(models.Model):
         self.user.spotifyusercredentials.check_expired()
         sp = get_spotify_user_client(self.user.spotifyusercredentials.access_token)
         playlists = get_all_playlists(sp)
-        # drop playlists that are no longer present
+        # TODO: drop playlists that are no longer present
         for playlist in playlists:
             spotify_id = playlist["id"]
             if UserPlaylist.objects.filter(spotify_id=spotify_id).exists():
@@ -135,11 +136,12 @@ class UserPlaylist(models.Model):
                 ),
                 album=track_data["album"]["name"],
             )
-            track.get_features()
+            #track.get_features()
             track.save()
             self.track_set.add(track)
 
         self.save()
+        self.update_track_features()
 
     def check_update(self):
         current = self.get_latest_snapshot()
@@ -151,6 +153,31 @@ class UserPlaylist(models.Model):
         self.snapshot_id = current
         #self.save()
         self.update_tracks()
+
+    def update_track_features(self):
+        missing = self.track_set.filter(track_features=None)
+        track_ids = [track.spotify_id for track in missing]
+        sp = get_spotify_client()
+        features = get_all_track_features(sp, track_ids)
+        for track, features_data in zip(missing, features):
+            print("Got track features for", track.name)
+            track.track_features = TrackFeatures.objects.create(
+                track=track,
+                acousticness=features_data["acousticness"],
+                danceability=features_data["danceability"],
+                energy=features_data["energy"],
+                instrumentalness=features_data["instrumentalness"],
+                key=features_data["key"],
+                liveness=features_data["liveness"],
+                loudness=features_data["loudness"],
+                mode=features_data["mode"],
+                speechiness=features_data["speechiness"],
+                tempo=features_data["tempo"],
+                time_signature=features_data["time_signature"],
+                valence=features_data["valence"],
+            )
+            track.save()
+        self.save()
 
     def __str__(self):
         return f"(name={self.name}, user={self.user.user.email}, spotifyID={self.spotify_id})"
@@ -172,6 +199,8 @@ class Track(models.Model):
         return ", ".join(self.artist_list)
 
     def get_features(self):
+        ## note: this is a VERY slow way of getting track features!
+        ## if possible, user UserPlaylist.update_track_features
         if hasattr(self, "track_features"):
             return
         print(f"getting features for track '{self.name}'")
@@ -192,7 +221,6 @@ class Track(models.Model):
             time_signature=track_features_data["time_signature"],
             valence=track_features_data["valence"],
         )
-        print(self.track_features)
         self.track_features.save()
         self.save()
 

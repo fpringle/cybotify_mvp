@@ -79,7 +79,7 @@ def get_all_playlist_tracks(sp, playlist_id):
         )
 
         info.extend(
-            tr["track"] for tr in response["items"] if not tr["track"]["is_local"]
+            tr["track"] for tr in response["items"] if not tr["track"].get("is_local", True)
         )
         offset = offset + len(response["items"])
         if not response["next"]:
