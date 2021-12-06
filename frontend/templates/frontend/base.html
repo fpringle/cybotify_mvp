@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      {% block title %}Cybotify{% endblock title %}
+    </title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <style>
+    {% block style %}{% endblock style %}
+    </style>
+  </head>
+  <body style="margin:0px">
+
+  <div id="container" style="display:flex; flex-direction:row; min-height:99.5vh">
+    <div id="sidebar" style="flex:1; background:#F0F8FF;">
+      {% block sidebar %}
+        <ul style="list-style-type:none;">
+        {% if request.user.is_authenticated %}
+          <li><a href="/">Home</a></li>
+          <li><a href="/playlists/">Playlists</a></li>
+          <li><a href="/profile/">Profile</a></li>
+          <li><a href="/logout/">Log out</a></li>
+        {% else %}
+          <li><a href="/">Home</a></li>
+          <li><a href="/login/">Log in</a></li>
+          <li><a href="/register/">Sign up</a></li>
+        {% endif %}
+        </ul>
+      {% endblock sidebar %}
+    </div>
+
+    <div id="content" style="flex:5;padding:100px;">
+      {% block content %}
+      {% endblock content %}
+    </div>
+  </div>
+  </body>
+</html>

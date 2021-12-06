@@ -1,0 +1,18 @@
+{% extends "frontend/base.html" %}
+
+{% block content %}
+<h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
+
+<div>Click one of your playlists to see a basic analysis:</div>
+<div id="playlists">
+  <ul id="playlistList">
+    {% for playlist in playlists %}
+      <li class="playlist">
+        <a href={% url 'playlist-detail' playlist.pk %}>
+          {{ playlist.name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

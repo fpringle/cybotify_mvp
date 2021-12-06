@@ -1,0 +1,8 @@
+{% extends "frontend/base.html" %}
+
+{% block content %}
+<h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
+
+<div>Playlist "{{ playlist.name }}"</div>
+
+{% endblock %}

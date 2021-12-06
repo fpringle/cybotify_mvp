@@ -1,0 +1,13 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+  {{ block.super }} - Sign up
+{% endblock title %}
+
+{% block content %}
+  <h2>Click below to grant Cybotify permission to use your Spotify information</h2>
+
+  <form action="/server/user/new/">
+      <input type="submit" value="Sign up" />
+  </form>
+{% endblock %}

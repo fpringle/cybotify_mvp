@@ -31,14 +31,21 @@ ALLOWED_HOSTS = ["192.168.0.10", "localhost", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
+    # cybotify
     'server.apps.ServerConfig',
     'server.stats.apps.StatsConfig',
+    'frontend.apps.FrontendConfig',
+
+    # builtin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd party
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +110,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#
+
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/login/"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

@@ -1,0 +1,29 @@
+{% extends "frontend/base.html" %}
+
+{% block style %}
+
+.key {
+  margin-right: 15px;
+}
+
+{% endblock style %}
+
+{% block content %}
+<h2>User profile of {{ request.user.username }}</h2>
+
+<ul style="list-style-type:none">
+  <li>
+    <span class="key">Name:</span>
+    <span class="value">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+  </li>
+  <li>
+    <span class="key">Email:</span>
+    <span class="value">{{ request.user.email }}</span>
+  </li>
+  <li>
+    <span class="key">Spotify username:</span>
+    <span class="value">{{ request.user.username }}</span>
+  </li>
+</ul>
+
+{% endblock %}

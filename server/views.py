@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.contrib.auth import login
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
@@ -108,4 +109,6 @@ def handle_spotify_auth_response(request):
     reg = query.get()
     reg.delete()
 
-    return HttpResponse("Awesome!")
+    login(request, user)
+
+    return HttpResponseRedirect('/user/new/create_password/')
