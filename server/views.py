@@ -8,18 +8,7 @@ from django.shortcuts import render
 from spotipy import Spotify
 
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
-from .spotify_client_info import get_spotify_oauth
-
-scopes = [
-    "user-read-private",
-    "user-read-email",
-    "user-library-modify",
-    "user-follow-read",
-    "user-top-read",
-    "playlist-modify-private",
-    "playlist-modify-public",
-    "playlist-read-collaborative",
-]
+from .spotify_client_info import get_spotify_oauth, scopes
 
 
 logger = logging.getLogger(__name__)
@@ -27,6 +16,8 @@ logger = logging.getLogger(__name__)
 def new_user(request):
     logger.info("Request for new user")
     reg = RegistrationState()
+    if request.user.is_authenticated:
+        reg.user = request.user
     reg.save()
     logger.info("Generated state string: %s", reg.state_string)
     oauth = get_spotify_oauth(scopes)
@@ -55,6 +46,8 @@ def handle_spotify_auth_response(request):
     elif length > 1:
         # handle duplicate state string
         pass
+
+    reg = query.get()
 
     oauth = get_spotify_oauth(scopes)
 
@@ -90,10 +83,13 @@ def handle_spotify_auth_response(request):
     logger.info("User email: %s", email)
     logger.info("User Spotify ID: %s", spotify_id)
 
-    user = User.objects.create_user(spotify_id, email)
-    user.first_name = first_name
-    user.last_name = last_name
-    user.save()
+    if reg.user:
+        user = reg.user
+    else:
+        user = User.objects.create_user(spotify_id, email)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
 
     su = SpotifyUser(user=user, spotify_id=spotify_id)
     su.save()
@@ -106,9 +102,10 @@ def handle_spotify_auth_response(request):
     )
     cred.save()
 
-    reg = query.get()
     reg.delete()
 
     login(request, user)
 
-    return HttpResponseRedirect('/user/new/create_password/')
+    if not (hasattr(user, "password") and user.password):
+        return HttpResponseRedirect('/user/new/create_password/')
+    return HttpResponseRedirect('/')

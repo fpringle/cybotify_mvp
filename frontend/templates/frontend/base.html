@@ -8,6 +8,7 @@
     <style>
     {% block style %}{% endblock style %}
     </style>
+    {% block scripts %}{% endblock scripts %}
   </head>
   <body style="margin:0px">
 
@@ -16,14 +17,18 @@
       {% block sidebar %}
         <ul style="list-style-type:none;">
         {% if request.user.is_authenticated %}
-          <li><a href="/">Home</a></li>
-          <li><a href="/playlists/">Playlists</a></li>
-          <li><a href="/profile/">Profile</a></li>
-          <li><a href="/logout/">Log out</a></li>
+          <li><a href={% url 'index' %}>Home</a></li>
+          {% if request.user.is_superuser %}
+          <li><a href={% url 'admin:index' %}>Admin</a></li>
+          {% else %}
+          <li><a href={% url 'playlists' %}>Playlists</a></li>
+          {% endif %}
+          <li><a href={% url 'profile' %}>Profile</a></li>
+          <li><a href={% url 'logout' %}>Log out</a></li>
         {% else %}
-          <li><a href="/">Home</a></li>
-          <li><a href="/login/">Log in</a></li>
-          <li><a href="/register/">Sign up</a></li>
+          <li><a href={% url 'index' %}>Home</a></li>
+          <li><a href={% url 'login' %}>Log in</a></li>
+          <li><a href={% url 'register' %}>Sign up</a></li>
         {% endif %}
         </ul>
       {% endblock sidebar %}

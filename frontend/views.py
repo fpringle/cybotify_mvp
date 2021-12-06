@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.contrib.auth import logout as auth_logout, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -5,6 +7,8 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 
 from .models import User, SpotifyUser, UserPlaylist, Track, TrackFeatures
+
+from server.stats.views import get_playlist_average_features
 
 def user_index(request):
     return render(request, 'frontend/index_loggedin.html')
@@ -34,10 +38,20 @@ def create_password(request):
     login(request, user)
     return HttpResponseRedirect('/')
 
+def needs_spotify_user(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not hasattr(request.user, "spotifyuser"):
+            return render(request, "frontend/register.html")
+        return func(request, *args, **kwargs)
+    return wrapper
+
 @login_required
+@needs_spotify_user
 def playlists(request):
-    user = request.user
-    playlists = user.spotifyuser.userplaylist_set.all()
+    su = request.user.spotifyuser
+    su.update_playlists()
+    playlists = su.userplaylist_set.all().order_by('name')
     context = {
         "playlists": playlists,
     }
@@ -48,9 +62,13 @@ def playlist_detail(request, playlist_id):
     playlist = UserPlaylist.objects.filter(pk=playlist_id).get()
     if request.user != playlist.user.user:
         return HttpResponseForbidden("That's not your playlist!")
+
+    playlist.check_update()
     context = {
-        "playlist": playlist,
+        "name": playlist.name,
+        "features": get_playlist_average_features(playlist),
     }
+
     return render(request, 'frontend/playlist_detail.html', context)
 
 @login_required

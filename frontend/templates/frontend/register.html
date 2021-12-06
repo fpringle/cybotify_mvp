@@ -5,9 +5,18 @@
 {% endblock title %}
 
 {% block content %}
+  {% if request.user.is_superuser %}
+  <h2>
+    Admin accounts can't connect spotify accounts.
+    To use the site as a normal user, create a separate user account and connect
+    your spotify to that account.
+  </h2>
+  {% else %}
   <h2>Click below to grant Cybotify permission to use your Spotify information</h2>
 
-  <form action="/server/user/new/">
+  <form action={% url 'new_user' %}>
+      {% csrf_token %}
       <input type="submit" value="Sign up" />
   </form>
+  {% endif %}
 {% endblock %}

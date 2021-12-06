@@ -18,19 +18,25 @@ from .models import (
 logger = logging.getLogger("admin")
 
 
-class TrackFeaturesAdmin(admin.StackedInline):
+class TrackFeaturesInlineAdmin(admin.StackedInline):
     model = TrackFeatures
 
     def has_change_permission(self, req, obj=None):
         return False
 
+class TrackFeaturesAdmin(admin.ModelAdmin):
+    model = TrackFeatures
 
 class TrackAdmin(admin.ModelAdmin):
     model = Track
     fieldsets = [
-        ("Track info", {"fields": ["spotify_id", "name", "artists", "album"]}),
+        ("Track info", {"fields": ["spotify_id", "name", "artist_list", "album"]}),
     ]
-    inlines = [TrackFeaturesAdmin]
+    inlines = [TrackFeaturesInlineAdmin]
+
+    @admin.display(description="Artists")
+    def artist_list(self, obj):
+        return ", ".join(obj.artist_list)
 
     def has_change_permission(self, req, obj=None):
         return False
@@ -43,10 +49,11 @@ class TrackInlineAdmin(admin.TabularInline):
 class UserPlaylistInlineAdmin(admin.TabularInline):
     model = UserPlaylist
     extra = 0
-    fields = readonly_fields = ("_name", "spotify_id", "snapshot_id", "last_updated")
+    fields = ("name", "link", "spotify_id", "snapshot_id", "last_updated")
+    readonly_fields = ("link", "last_updated")
 
-    @admin.display(description="Name")
-    def _name(self, obj):
+    @admin.display(description="Link")
+    def link(self, obj):
         return mark_safe(
             '<a href="{}">{}</a>'.format(
                 reverse("admin:server_userplaylist_change", args=(obj.pk,)), obj.name
@@ -56,7 +63,7 @@ class UserPlaylistInlineAdmin(admin.TabularInline):
 
 class UserPlaylistAdmin(admin.ModelAdmin):
     model = UserPlaylist
-    readonly_fields = (
+    fields = (
         "spotify_id",
         "snapshot_id",
         "name",
@@ -64,6 +71,7 @@ class UserPlaylistAdmin(admin.ModelAdmin):
         "tracks",
         "last_updated",
     )
+    readonly_fields = ("tracks", "last_updated")
 
     def tracks(self, obj):
         def get_link(track):
@@ -87,9 +95,12 @@ class SpotifyUserInlineAdmin(admin.StackedInline):
     readonly_fields = ("user_link",)
 
     def user_link(self, obj):
+        if not obj.user:
+            return "No spotify user is associated with this account."
+
         return mark_safe(
             '<a href="{}">{}</a>'.format(
-                reverse("admin:server_spotifyuser_change", args=(obj.user.pk,)),
+                reverse("admin:server_spotifyuser_change", args=(obj.pk,)),
                 obj.user.spotifyuser.spotify_id,
             )
         )
@@ -126,3 +137,4 @@ admin.site.register(Track, TrackAdmin)
 admin.site.register(SpotifyUser, SpotifyUserAdmin)
 admin.site.register(UserPlaylist, UserPlaylistAdmin)
 admin.site.register(RegistrationState, RegistrationStateAdmin)
+admin.site.register(TrackFeatures, TrackFeaturesAdmin)

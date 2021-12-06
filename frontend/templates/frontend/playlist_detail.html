@@ -1,8 +1,17 @@
 {% extends "frontend/base.html" %}
 
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.7.0.min.js"></script>
+{{ features|json_script:"features" }}
+{% load static %}
+<script src="{% static 'frontend/js/features.js' %}" type="application/javascript"></script>
+{% endblock scripts %}
+
 {% block content %}
 <h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
 
-<div>Playlist "{{ playlist.name }}"</div>
+<div>Playlist "{{ name }}"</div>
+
+<div id="spiderPlot"/>
 
 {% endblock %}
