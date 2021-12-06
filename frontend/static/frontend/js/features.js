@@ -17,6 +17,9 @@ const plotSpider = (plotData) => {
   const r = fields.map(f => plotData[f]);
   const data = [{
     type: 'scatterpolar',
+    //mode: 'lines+markers',
+    hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
+    hoverinfo: 'none',
     r,
     theta,
     fill: 'toself',
@@ -26,15 +29,19 @@ const plotSpider = (plotData) => {
       radialaxis: {
         visible: true,
         range: [0, 1]
-      }
+      },
+  //    bgcolor: '#A9A9A9',
     },
-    showlegend: false
+    showlegend: false,
+    font: {
+      size: 20,
+    },
+    //paper_bgcolor: '#A9A9A9',
   };
   Plotly.newPlot('spiderPlot', data, layout);
 };
 
 $(document).ready(() => {
-  console.log($('#features').text());
   const features = JSON.parse($('#features').text());
   const values = features.features;
   plotSpider(values);

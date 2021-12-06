@@ -7,11 +7,30 @@
 <script src="{% static 'frontend/js/features.js' %}" type="application/javascript"></script>
 {% endblock scripts %}
 
+{% block style %}
+body {
+  background-color: #383838;
+}
+.outline { border: 1px solid black }
+{% endblock style %}
+
 {% block content %}
-<h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
 
-<div>Playlist "{{ name }}"</div>
+<div id="contentContainer" class="outline" style="background-color:{##A9A9A9#}white;display:flex; height:100%; flex-direction:row;">
+  <div id="playlistInfo" style="flex:1; padding: 20px; border-right: 10px solid #383838">
+    <h3 style="text-align: center">{{ playlist.name }}</h3>
+    <div style="text-align: center; overflow-y: auto; max-height:70vh;">
+      {% for track in playlist.track_set.all %}
+        <p style="border-top:2px solid black; padding-top: 15px; padding-bottom:0px; margin-bottom: 0px;">
+          {{ track.name }}
+          <br>
+          {{ track.artists_comma_separated }}
+        </p>
+      {% endfor %}
+    </div>
+  </div>
 
-<div id="spiderPlot"/>
+  <div id="spiderPlot" class="outline" style="flex:2; padding:15px"/>
+<div>
 
 {% endblock %}

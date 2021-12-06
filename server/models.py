@@ -167,6 +167,10 @@ class Track(models.Model):
     def artist_list(self):
         return self.artists.split(" =|AND|= ")
 
+    @property
+    def artists_comma_separated(self):
+        return ", ".join(self.artist_list)
+
     def get_features(self):
         if hasattr(self, "track_features"):
             return

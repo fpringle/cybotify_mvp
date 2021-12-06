@@ -65,7 +65,7 @@ def playlist_detail(request, playlist_id):
 
     playlist.check_update()
     context = {
-        "name": playlist.name,
+        "playlist": playlist,
         "features": get_playlist_average_features(playlist),
     }
 
