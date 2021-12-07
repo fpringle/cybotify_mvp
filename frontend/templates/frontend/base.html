@@ -22,11 +22,11 @@
   <body>
 
   <div id="container">
-    <div id="sidebar">
-      <div id="sidebarTitle">
+    <div id="menubar">
+      <div id="menubarTitle">
         Cybotify
       </div>
-      {% block sidebar %}
+      {% block menubar %}
         <ul style="list-style-type:none;">
         {% if request.user.is_authenticated %}
           <li><a href={% url 'index' %}>Home</a></li>
@@ -43,7 +43,7 @@
           <li><a href={% url 'register' %}>Sign up</a></li>
         {% endif %}
         </ul>
-      {% endblock sidebar %}
+      {% endblock menubar %}
     </div>
 
     <div id="content">

@@ -4,8 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from spotipy.oauth2 import SpotifyOAuth
-
 from .spotify_client_info import (
     get_spotify_oauth,
     get_spotify_user_client,
@@ -124,7 +122,7 @@ class UserPlaylist(models.Model):
         for track_data in tracks:
             if Track.objects.filter(spotify_id=track_data["id"]).exists():
                 track = Track.objects.get(spotify_id=track_data["id"])
-                track.get_features()
+                #track.get_features()
                 if not self.track_set.filter(pk=track.pk).exists():
                     self.track_set.add(track)
                 continue
@@ -160,6 +158,10 @@ class UserPlaylist(models.Model):
         sp = get_spotify_client()
         features = get_all_track_features(sp, track_ids)
         for track, features_data in zip(missing, features):
+            if not features_data:
+                print("No track features available for track", track.name)
+                # should mark this somehow
+                continue
             print("Got track features for", track.name)
             track.track_features = TrackFeatures.objects.create(
                 track=track,
@@ -206,6 +208,7 @@ class Track(models.Model):
         print(f"getting features for track '{self.name}'")
         sp = get_spotify_client()
         track_features_data = sp.audio_features(self.spotify_id)[0]
+        print(track_features_data)
         self.track_features = TrackFeatures(
             track=self,
             acousticness=track_features_data["acousticness"],

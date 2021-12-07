@@ -32,6 +32,8 @@ ALL_FIELDS = FLOAT_FIELDS + INTEGER_FIELDS + ENUM_FIELDS
 
 def get_track_features(track, fields=None):
     fields = fields or ALL_FIELDS[:]
+    if not hasattr(track, "track_features"):
+        return {}
     features = track.track_features
     return {
         field: getattr(features, field) for field in fields if hasattr(features, field)

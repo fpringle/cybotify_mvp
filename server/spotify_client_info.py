@@ -1,12 +1,22 @@
 import environ
 
-from spotipy import Spotify
+from spotipy import CacheHandler, Spotify
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 
 from django.conf import settings
 
 env = environ.Env()
 environ.Env.read_env(settings.BASE_DIR / "cybotify" / ".env")
+
+
+
+class NoCachingCacheHandler(CacheHandler):
+    def __init__(*args, **kwargs):
+        pass
+    def get_cached_token(self, *args, **kwargs):
+        pass
+    def save_token_to_cache(self, token_info, *args, **kwargs):
+        pass
 
 def get_client_info():
     return (
@@ -37,6 +47,7 @@ def get_spotify_oauth(scopes, requests_timeout=10):
         requests_timeout=requests_timeout,
         scope=scope,
         open_browser=False,
+        cache_handler=NoCachingCacheHandler()
     )
 
 def get_spotify_client_credentials(requests_timeout=10):
@@ -44,7 +55,8 @@ def get_spotify_client_credentials(requests_timeout=10):
     return SpotifyClientCredentials(
         client_id=client_id,
         client_secret=client_secret,
-        requests_timeout=requests_timeout
+        requests_timeout=requests_timeout,
+        cache_handler=NoCachingCacheHandler()
     )
 
 def get_spotify_client(requests_timeout=10, retries=10):

@@ -6,10 +6,8 @@ from django.contrib.auth.hashers import is_password_usable
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
-from spotipy import Spotify
-
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
-from .spotify_client_info import get_spotify_oauth, scopes
+from .spotify_client_info import get_spotify_oauth, get_spotify_user_client, scopes
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +64,7 @@ def handle_spotify_auth_response(request):
     logger.info("Refresh token: %s", refresh_token)
     logger.info("Expires at: %s", expires_at)
 
-    sp = Spotify(auth=access_token)
+    sp = get_spotify_user_client(access_token)
     user_info = sp.current_user()
 
     spotify_id = user_info["id"]

@@ -34,17 +34,17 @@ body {
   height: 99.5vh;
 }
 
-#sidebar ul {
+#menubar ul {
   padding-left: 0px;
 }
 
-#sidebar li {
+#menubar li {
   font-size: 25px;
   margin-right: 20px;
   display: inline;
 }
 
-#sidebar {
+#menubar {
   padding: 15px;
   flex: 1;
   background: #F0F8FF;
@@ -53,7 +53,7 @@ body {
   align-items: center;
 }
 
-#sidebarTitle {
+#menubarTitle {
   font-size: 45px;
   margin-left: 30px;
 }
