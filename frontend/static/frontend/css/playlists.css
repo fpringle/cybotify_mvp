@@ -1,0 +1,16 @@
+.playlist {
+  margin-bottom: 20px;
+  display: flex;
+}
+
+.playlistName {
+  font-size: 22px;
+  margin-right: 50px;
+  flex: 1;
+}
+
+.playlistLAstUpdated {
+  font-size: 12px;
+  width: 200px;
+  flex: 2;
+}

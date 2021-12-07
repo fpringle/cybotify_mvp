@@ -1,28 +1,25 @@
 {% extends "frontend/base.html" %}
 
-{% block style %}
-
-.key {
-  margin-right: 15px;
-}
-
-{% endblock style %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href={% static 'frontend/css/profile.css' %}>
+{% endblock css %}
 
 {% block content %}
 <h2>User profile of {{ request.user.username }}</h2>
 
-<ul style="list-style-type:none">
+<ul>
   <li>
-    <span class="key">Name:</span>
-    <span class="value">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+    <span class="attributeName">Name:</span>
+    <span class="attributeValue">{{ request.user.first_name }} {{ request.user.last_name }}</span>
   </li>
   <li>
-    <span class="key">Email:</span>
-    <span class="value">{{ request.user.email }}</span>
+    <span class="attributeName">Email:</span>
+    <span class="attributeValue">{{ request.user.email }}</span>
   </li>
   <li>
-    <span class="key">Spotify username:</span>
-    <span class="value">{{ request.user.username }}</span>
+    <span class="attributeName">Spotify username:</span>
+    <span class="attributeValue">{{ request.user.username }}</span>
   </li>
 </ul>
 

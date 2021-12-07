@@ -1,0 +1,42 @@
+body {
+  background-color: #383838;
+}
+
+.outline {
+  border: 1px solid black;
+}
+
+#contentContainer {
+  background-color: white; /*#A9A9A9*/
+  display: flex;
+  height: 100%;
+  flex-direction: row;
+}
+
+#playlistInfo {
+  flex:1;
+  padding: 20px;
+  border-right: 10px solid #383838;
+}
+
+#playlistName {
+  text-align: center;
+}
+
+.trackInfo {
+  border-top: 2px solid black;
+  padding-top: 15px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+#trackContainer {
+  text-align: center;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+#spiderPlot {
+  flex:2;
+  padding:15px;
+}

@@ -1,18 +1,23 @@
 {% extends "frontend/base.html" %}
 
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href={% static 'frontend/css/playlists.css' %}>
+{% endblock css %}
+
 {% block content %}
 <h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
 
 <div style="font-size: 18px">Click one of your playlists to see a basic analysis:</div>
 
 <div id="playlists">
-  <ul id="playlistList" style="list-style-type: none">
+  <ul id="playlistList">
     {% for playlist in playlists %}
-      <li class="playlist">
+      <li>
         <a href={% url 'playlist-detail' playlist.pk %}>
-          <div style="margin-bottom: 20px; display: flex">
-            <span style="font-size: 22px; margin-right: 50px; flex: 1">{{ playlist.name }}</span>
-            <span style="font-size: 12px; width: 200px; flex: 2">last updated {{ playlist.last_updated }}</span>
+          <div class="playlist">
+            <span class="playlistName">{{ playlist.name }}</span>
+            <span class="playlistLastUpdated">last updated {{ playlist.last_updated }}</span>
           </div>
         </a>
       </li>

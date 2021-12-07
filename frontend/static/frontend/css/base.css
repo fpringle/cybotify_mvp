@@ -1,0 +1,39 @@
+body {
+  margin: 0px;
+}
+
+#container {
+  display: flex;
+  flex-direction: row;
+  min-height: 99.5vh;
+}
+
+#sidebar li {
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+
+#sidebar {
+  padding-top: 50px;
+  flex: 1;
+  background: #F0F8FF;
+}
+
+#content {
+  flex: 5;
+  padding: 100px;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+a: visited {
+  text-decoration: none;
+  color: black;
+}
+
+ul {
+  list-style-type: none;
+}

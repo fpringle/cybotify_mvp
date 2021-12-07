@@ -5,30 +5,22 @@
       {% block title %}Cybotify{% endblock title %}
     </title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href={% static 'frontend/css/base.css' %}>
+    {% block css %}
+    {% endblock css %}
+
     <style>
-    #sidebar li {
-      font-size: 25px;
-      margin-bottom: 10px;
-    }
-    #sidebar {
-      padding-top: 50px;
-    }
-    a {
-      text-decoration: none;
-      color: black;
-    }
-    a:visited {
-      text-decoration: none;
-      color: black;
-    }
     {% block style %}{% endblock style %}
     </style>
+
     {% block scripts %}{% endblock scripts %}
   </head>
-  <body style="margin:0px">
+  <body>
 
-  <div id="container" style="display:flex; flex-direction:row; min-height:99.5vh">
-    <div id="sidebar" style="flex:1; background:#F0F8FF;">
+  <div id="container">
+    <div id="sidebar">
       {% block sidebar %}
         <ul style="list-style-type:none;">
         {% if request.user.is_authenticated %}
@@ -49,7 +41,7 @@
       {% endblock sidebar %}
     </div>
 
-    <div id="content" style="flex:5;padding:100px;">
+    <div id="content">
       {% block content %}
       {% endblock content %}
     </div>
