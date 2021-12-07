@@ -4,6 +4,11 @@
   {{ block.super }} - Sign up
 {% endblock title %}
 
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href={% static 'frontend/css/register.css' %}>
+{% endblock css %}
+
 {% block content %}
   {% if request.user.is_superuser %}
   <h2>
