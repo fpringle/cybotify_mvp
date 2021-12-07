@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+  {% if request.user.is_authenticated %}
   <h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
+  {% else %}
+  <h2>Hi, welcome to Cybotify!</h2>
+  {% endif %}
 {% endblock %}

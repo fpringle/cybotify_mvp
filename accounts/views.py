@@ -2,9 +2,9 @@ from functools import wraps
 import datetime
 import logging
 
-from django.contrib.auth import login
+from django.contrib.auth import login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import is_password_usable
+from django.contrib.auth.hashers import is_password_usable, make_password
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
@@ -90,7 +90,7 @@ def handle_spotify_auth_response(request):
         user = reg.user
     else:
         print("create new user")
-        user = User.objects.create_user(email=email)
+        user = User.objects.create_user(username=spotify_id, email=email)
         user.first_name = first_name
         user.last_name = last_name
         user.save()
@@ -110,20 +110,8 @@ def handle_spotify_auth_response(request):
 
     login(request, user)
     if not (hasattr(user, "password") and is_password_usable(user.password)):
-        return HttpResponseRedirect('/user/new/create_password/')
+        return HttpResponseRedirect('/accounts/new/create_password/')
     return HttpResponseRedirect('/')
-
-def user_index(request):
-    return render(request, 'index_loggedin.html')
-
-def anon_index(request):
-    return render(request, 'index_anon.html')
-
-def index(request):
-    if request.user.is_authenticated:
-        return user_index(request)
-    else:
-        return anon_index(request)
 
 def logout(request):
     auth_logout(request)

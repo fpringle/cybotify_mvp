@@ -94,4 +94,4 @@ def playlist_detail(request, playlist_id):
         "features": get_playlist_average_features(playlist),
     }
 
-    return render(request, '', context)
+    return render(request, 'playlist_detail.html', context)
