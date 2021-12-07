@@ -88,7 +88,7 @@ def handle_spotify_auth_response(request):
         user = reg.user
     else:
         print("create new user")
-        user = User.objects.create_user(username=spotify_id, email=email)
+        user = User.objects.create_user(email=email)
         user.first_name = first_name
         user.last_name = last_name
         user.save()
