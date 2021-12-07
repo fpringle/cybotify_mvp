@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
 
-from .models import UserPlaylist
+from music.models import UserPlaylist
 
 FLOAT_FIELDS = [
     "danceability",
@@ -80,3 +81,17 @@ def get_playlist_features(request, playlist_id):
 
     features = get_playlist_features_by_db_id(playlist_id, fields)
     return JsonResponse(features)
+
+@login_required
+def playlist_detail(request, playlist_id):
+    playlist = UserPlaylist.objects.filter(pk=playlist_id).get()
+    if request.user != playlist.user.user:
+        return HttpResponseForbidden("That's not your playlist!")
+
+    playlist.check_update()
+    context = {
+        "playlist": playlist,
+        "features": get_playlist_average_features(playlist),
+    }
+
+    return render(request, '', context)

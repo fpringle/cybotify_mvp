@@ -10,6 +10,8 @@ from .models import (
     RegistrationState,
     SpotifyUser,
     SpotifyUserCredentials,
+)
+from music.models import (
     UserPlaylist,
     Track,
     TrackFeatures,
@@ -56,7 +58,7 @@ class UserPlaylistInlineAdmin(admin.TabularInline):
     def link(self, obj):
         return mark_safe(
             '<a href="{}">{}</a>'.format(
-                reverse("admin:server_userplaylist_change", args=(obj.pk,)), obj.name
+                reverse("admin:music_userplaylist_change", args=(obj.pk,)), obj.name
             )
         )
 
@@ -76,7 +78,7 @@ class UserPlaylistAdmin(admin.ModelAdmin):
     def tracks(self, obj):
         def get_link(track):
             return '<a href="{}">{}</a>'.format(
-                reverse("admin:server_track_change", args=(track.pk,)), track.name
+                reverse("admin:music_track_change", args=(track.pk,)), track.name
             )
 
         def get_li(track):
@@ -100,7 +102,7 @@ class SpotifyUserInlineAdmin(admin.StackedInline):
 
         return mark_safe(
             '<a href="{}">{}</a>'.format(
-                reverse("admin:server_spotifyuser_change", args=(obj.pk,)),
+                reverse("admin:accounts_spotifyuser_change", args=(obj.pk,)),
                 obj.user.spotifyuser.spotify_id,
             )
         )

@@ -6,6 +6,6 @@ urlpatterns = [
     path(
         "playlist/<int:playlist_id>/analysis/",
         views.get_playlist_features,
-        name="playlist_analysis",
+        name="playlist-analysis",
     ),
 ]

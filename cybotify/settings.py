@@ -32,9 +32,9 @@ ALLOWED_HOSTS = ["192.168.0.10", "localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
     # cybotify
-    'server.apps.ServerConfig',
-    'server.stats.apps.StatsConfig',
-    'frontend.apps.FrontendConfig',
+    'accounts.apps.AccountsConfig',
+    'music.apps.MusicConfig',
+    'stats.apps.StatsConfig',
 
     # builtin
     'django.contrib.admin',
