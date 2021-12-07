@@ -63,9 +63,11 @@ def get_playlist_average_features(playlist, fields=None):
         "features": track_features,
     }
 
+
 def get_playlist_features_by_db_id(id, fields=None):
     playlist = UserPlaylist.objects.filter(pk=id).get()
     return get_playlist_average_features(playlist, fields)
+
 
 def get_playlist_features_by_spotify_id(spotify_id, fields=None):
     playlist = UserPlaylist.objects.filter(spotify_id=spotify_id).get()
@@ -82,6 +84,7 @@ def get_playlist_features(request, playlist_id):
     features = get_playlist_features_by_db_id(playlist_id, fields)
     return JsonResponse(features)
 
+
 @login_required
 def playlist_detail(request, playlist_id):
     playlist = UserPlaylist.objects.filter(pk=playlist_id).get()
@@ -94,4 +97,4 @@ def playlist_detail(request, playlist_id):
         "features": get_playlist_average_features(playlist),
     }
 
-    return render(request, 'playlist_detail.html', context)
+    return render(request, "playlist_detail.html", context)

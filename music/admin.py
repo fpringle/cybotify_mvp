@@ -11,11 +11,13 @@ class TrackFeaturesInlineAdmin(admin.StackedInline):
     def has_change_permission(self, req, obj=None):
         return False
 
+
 class TrackFeaturesAdmin(admin.ModelAdmin):
     model = TrackFeatures
 
     def has_change_permission(self, req, obj=None):
         return False
+
 
 class TrackAdmin(admin.ModelAdmin):
     model = Track
@@ -31,8 +33,10 @@ class TrackAdmin(admin.ModelAdmin):
     def has_change_permission(self, req, obj=None):
         return False
 
+
 class TrackInlineAdmin(admin.TabularInline):
     model = Track
+
 
 class UserPlaylistAdmin(admin.ModelAdmin):
     model = UserPlaylist
@@ -56,6 +60,7 @@ class UserPlaylistAdmin(admin.ModelAdmin):
             return "<li>" + get_link(track) + "</li>"
 
         return mark_safe("<ul>" + "".join(map(get_li, obj.track_set.all())) + "</ul>")
+
 
 class UserPlaylistInlineAdmin(admin.TabularInline):
     model = UserPlaylist

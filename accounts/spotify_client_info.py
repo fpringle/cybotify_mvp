@@ -9,14 +9,16 @@ env = environ.Env()
 environ.Env.read_env(settings.BASE_DIR / "cybotify" / ".env")
 
 
-
 class NoCachingCacheHandler(CacheHandler):
     def __init__(*args, **kwargs):
         pass
+
     def get_cached_token(self, *args, **kwargs):
         pass
+
     def save_token_to_cache(self, token_info, *args, **kwargs):
         pass
+
 
 def get_client_info():
     return (
@@ -24,6 +26,7 @@ def get_client_info():
         env("SPOTIFY_CLIENT_SECRET"),
         env("SPOTIFY_REDIRECT_URI"),
     )
+
 
 scopes = [
     "user-read-private",
@@ -37,6 +40,7 @@ scopes = [
     "playlist-read-private",
 ]
 
+
 def get_spotify_oauth(scopes, requests_timeout=10):
     client_id, client_secret, redirect_uri = get_client_info()
     scope = scopes if isinstance(scopes, str) else " ".join(scopes)
@@ -47,8 +51,9 @@ def get_spotify_oauth(scopes, requests_timeout=10):
         requests_timeout=requests_timeout,
         scope=scope,
         open_browser=False,
-        cache_handler=NoCachingCacheHandler()
+        cache_handler=NoCachingCacheHandler(),
     )
+
 
 def get_spotify_client_credentials(requests_timeout=10):
     client_id, client_secret, _ = get_client_info()
@@ -56,15 +61,22 @@ def get_spotify_client_credentials(requests_timeout=10):
         client_id=client_id,
         client_secret=client_secret,
         requests_timeout=requests_timeout,
-        cache_handler=NoCachingCacheHandler()
+        cache_handler=NoCachingCacheHandler(),
     )
+
 
 def get_spotify_client(requests_timeout=10, retries=10):
     auth = get_spotify_client_credentials(requests_timeout)
-    return Spotify(auth_manager=auth, requests_timeout=requests_timeout, retries=retries)
+    return Spotify(
+        auth_manager=auth, requests_timeout=requests_timeout, retries=retries
+    )
+
 
 def get_spotify_user_client(access_token, requests_timeout=10, retries=10):
-    return Spotify(auth=access_token, requests_timeout=requests_timeout, retries=retries)
+    return Spotify(
+        auth=access_token, requests_timeout=requests_timeout, retries=retries
+    )
+
 
 def get_all_playlists(spotify_user_client):
     offset = 0
@@ -77,6 +89,7 @@ def get_all_playlists(spotify_user_client):
             break
 
     return playlists
+
 
 def get_all_playlist_tracks(sp, playlist_id):
     offset = 0
@@ -91,13 +104,16 @@ def get_all_playlist_tracks(sp, playlist_id):
         )
 
         info.extend(
-            tr["track"] for tr in response["items"] if not tr["track"].get("is_local", True)
+            tr["track"]
+            for tr in response["items"]
+            if not tr["track"].get("is_local", True)
         )
         offset = offset + len(response["items"])
         if not response["next"]:
             break
 
     return info
+
 
 def get_all_track_features(sp, tracks):
     track_features = []

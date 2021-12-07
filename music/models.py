@@ -29,7 +29,7 @@ class UserPlaylist(models.Model):
         for track_data in tracks:
             if Track.objects.filter(spotify_id=track_data["id"]).exists():
                 track = Track.objects.get(spotify_id=track_data["id"])
-                #track.get_features()
+                # track.get_features()
                 if not self.track_set.filter(pk=track.pk).exists():
                     self.track_set.add(track)
                 continue
@@ -41,7 +41,7 @@ class UserPlaylist(models.Model):
                 ),
                 album=track_data["album"]["name"],
             )
-            #track.get_features()
+            # track.get_features()
             track.save()
             self.track_set.add(track)
 
@@ -53,10 +53,12 @@ class UserPlaylist(models.Model):
         if current == self.snapshot_id:
             print("  Already up to date")
             return
-        print(f"Playlist {self.name} - checking for updates (DB snapshot ID {self.snapshot_id})")
+        print(
+            f"Playlist {self.name} - checking for updates (DB snapshot ID {self.snapshot_id})"
+        )
         print(f"  Spotify latest snapshot id is {current}, updating")
         self.snapshot_id = current
-        #self.save()
+        # self.save()
         self.update_tracks()
 
     def update_track_features(self):

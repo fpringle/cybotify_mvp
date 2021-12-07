@@ -48,11 +48,11 @@ class SpotifyUser(models.Model):
         playlist = UserPlaylist.objects.create(
             spotify_id=playlist_data["id"],
             name=playlist_data["name"],
-            #snapshot_id=playlist_data["snapshot_id"],
+            # snapshot_id=playlist_data["snapshot_id"],
             user=self,
         )
         playlist.save()
-        #playlist.update_tracks()
+        # playlist.update_tracks()
 
     def update_playlists(self):
         self.user.spotifyusercredentials.check_expired()
@@ -62,8 +62,8 @@ class SpotifyUser(models.Model):
         for playlist in playlists:
             spotify_id = playlist["id"]
             if UserPlaylist.objects.filter(spotify_id=spotify_id).exists():
-                #pl = UserPlaylist.objects.get(spotify_id=spotify_id)
-                #pl.check_update()
+                # pl = UserPlaylist.objects.get(spotify_id=spotify_id)
+                # pl.check_update()
                 pass
             else:
                 self.new_playlist(playlist)

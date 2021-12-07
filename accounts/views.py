@@ -14,6 +14,7 @@ from .spotify_client_info import get_spotify_oauth, get_spotify_user_client, sco
 
 logger = logging.getLogger(__name__)
 
+
 def new_user(request):
     logger.info("Request for new user")
     reg = RegistrationState()
@@ -39,7 +40,7 @@ def handle_spotify_auth_response(request):
     logger.info("Auth code: %s", code)
     logger.info("State string: %s", state)
 
-    query = RegistrationState.objects.filter(state_string = state)
+    query = RegistrationState.objects.filter(state_string=state)
     length = query.count()
     if length == 0:
         # handle bad state string
@@ -102,7 +103,7 @@ def handle_spotify_auth_response(request):
         user=user,
         access_token=access_token,
         refresh_token=refresh_token,
-        expires_at=expires_at
+        expires_at=expires_at,
     )
     cred.save()
 
@@ -110,12 +111,14 @@ def handle_spotify_auth_response(request):
 
     login(request, user)
     if not (hasattr(user, "password") and is_password_usable(user.password)):
-        return HttpResponseRedirect('/accounts/new/create_password/')
-    return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/accounts/new/create_password/")
+    return HttpResponseRedirect("/")
+
 
 def logout(request):
     auth_logout(request)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")
+
 
 def create_password(request):
     if request.method == "GET":
@@ -131,7 +134,8 @@ def create_password(request):
     user.password = make_password(password)
     user.save()
     login(request, user)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")
+
 
 def needs_spotify_user(func):
     @wraps(func)
@@ -139,24 +143,28 @@ def needs_spotify_user(func):
         if not hasattr(request.user, "spotifyuser"):
             return render(request, "register.html")
         return func(request, *args, **kwargs)
+
     return wrapper
+
 
 @login_required
 @needs_spotify_user
 def playlists(request):
     su = request.user.spotifyuser
     su.update_playlists()
-    playlists = su.userplaylist_set.all().order_by('name')
+    playlists = su.userplaylist_set.all().order_by("name")
     context = {
         "playlists": playlists,
     }
-    return render(request, 'playlists.html', context)
+    return render(request, "playlists.html", context)
+
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html')
+    return render(request, "profile.html")
+
 
 def register(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('/')
-    return render(request, 'register.html')
+        return HttpResponseRedirect("/")
+    return render(request, "register.html")
