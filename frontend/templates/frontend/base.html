@@ -6,6 +6,8 @@
     </title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
+    <link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>
+
     {% load static %}
     <link rel="stylesheet" href={% static 'frontend/css/base.css' %}>
     {% block css %}
@@ -21,6 +23,9 @@
 
   <div id="container">
     <div id="sidebar">
+      <div id="sidebarTitle">
+        Cybotify
+      </div>
       {% block sidebar %}
         <ul style="list-style-type:none;">
         {% if request.user.is_authenticated %}

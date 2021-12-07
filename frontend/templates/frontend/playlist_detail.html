@@ -14,9 +14,11 @@
 
 {% block content %}
 
-<div id="contentContainer" class="outline">
+<div id="contentContainer">
   <div id="playlistInfo">
-    <h3 id="playlistName">{{ playlist.name }}</h3>
+    <div id="playlistName">
+      <span class="selectable">{{ playlist.name }}</span>
+    </div>
     <div id="trackContainer">
       {% for track in playlist.track_set.all %}
         <p class="trackInfo">
@@ -28,7 +30,7 @@
     </div>
   </div>
 
-  <div id="spiderPlot" class="outline"/>
+  <div id="spiderPlot"/>
 <div>
 
 {% endblock %}

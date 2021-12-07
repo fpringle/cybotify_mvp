@@ -1,16 +1,33 @@
 .playlist {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   display: flex;
+  color: white;
+  justify-content: flex-start;
+  width: 800px;
+  padding: 15px;
+}
+
+.playlist:hover {
+  outline: 1px solid white;
 }
 
 .playlistName {
   font-size: 22px;
   margin-right: 50px;
-  flex: 1;
+  width: 500px;
+  /*flex: 1;*/
 }
 
-.playlistLAstUpdated {
+.playlistLastUpdated {
   font-size: 12px;
-  width: 200px;
-  flex: 2;
+  width: 250px;
+/*  flex: 1;*/
+}
+
+#playlists {
+  margin-top: 50px;
+/*  overflow-y: scroll;*/
+}
+
+a {
 }
