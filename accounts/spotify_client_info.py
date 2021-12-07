@@ -89,6 +89,15 @@ def get_all_playlists(spotify_user_client):
     return playlists
 
 
+def get_playlist_status(playlist_data):
+    if playlist_data.get("public", False):
+        return "PU"
+    elif playlist_data.get("collaborative", False):
+        return "CO"
+    else:
+        return "PR"
+
+
 def get_all_playlist_tracks(sp, playlist_id):
     offset = 0
     info = []

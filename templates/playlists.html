@@ -3,32 +3,31 @@
 {% block css %}
 {% load static %}
 <link rel="stylesheet" href={% static 'css/playlists.css' %}>
-<link rel="stylesheet" href={% static 'css/playlists.css' %}>
 {% endblock css %}
+
+{% block scripts %}
+{{ playlist_data|json_script:"playlists" }}
+{% load static %}
+<script src="{% static 'js/playlists.js' %}" type="application/javascript"></script>
+{% endblock scripts %}
 
 {% block content %}
 <h2>Hi {{ request.user.first_name|title }}, welcome to Cybotify!</h2>
 
 <div style="font-size: 18px">Click one of your playlists to see a basic analysis</div>
 
+<div>
+  <label for="filter">Filter by playlist type:</label>
+  <select name="filter" id="filter" style="font-size: 18px">
+    <option value="ALL" selected>All</option>
+    <option value="PR">Private</option>
+    <option value="PU">Public</option>
+    <option value="CO">Collaborative</option>
+  </select>
+</div>
+
 <div id="playlists">
   <ul id="playlistList">
-    {% for playlist in playlists %}
-      <li>
-        <a href={% url 'playlist-detail' playlist.pk %}>
-          <div class="playlist">
-            <span class="playlistName">
-              {% if playlist.name %}
-              {{ playlist.name }}
-              {% else %}
-              Untitled
-              {% endif %}
-            </span>
-            <span class="playlistLastUpdated">last updated {{ playlist.last_updated }}</span>
-          </div>
-        </a>
-      </li>
-    {% endfor %}
   </ul>
 </div>
 {% endblock %}

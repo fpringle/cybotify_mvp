@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from accounts.spotify_client_info import (
     get_all_playlist_tracks,
@@ -12,8 +13,19 @@ class UserPlaylist(models.Model):
     spotify_id = models.CharField(max_length=256)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
+    # TODO: make many-to-many
     user = models.ForeignKey("accounts.SpotifyUser", on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now=True)
+
+    class Status(models.TextChoices):
+        PRIVATE = "PR", _("Private")
+        PUBLIC = "PU", _("Public")
+        COLLABORATIVE = "CO", _("Collaborative")
+
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+    )
 
     def get_latest_snapshot(self):
         su = self.user.user
