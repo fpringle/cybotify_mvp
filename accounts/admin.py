@@ -1,18 +1,14 @@
 import logging
 
 from django.contrib import admin
-from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.safestring import mark_safe
+from django.contrib.auth.models import User
 from django.urls import reverse
-
-from .models import (
-    RegistrationState,
-    SpotifyUser,
-    SpotifyUserCredentials,
-)
+from django.utils.safestring import mark_safe
 
 from music.admin import UserPlaylistInlineAdmin
+
+from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials
 
 logger = logging.getLogger("admin")
 

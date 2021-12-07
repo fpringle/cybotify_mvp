@@ -1,15 +1,16 @@
 import datetime
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 from django.utils import timezone
 
 from music.models import UserPlaylist
 
 from .spotify_client_info import (
+    get_all_playlists,
     get_spotify_oauth,
     get_spotify_user_client,
-    get_all_playlists,
+    scopes,
 )
 from .util import random_string
 

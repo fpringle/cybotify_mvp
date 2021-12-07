@@ -1,10 +1,10 @@
 from django.db import models
 
 from accounts.spotify_client_info import (
-    get_spotify_user_client,
     get_all_playlist_tracks,
     get_all_track_features,
     get_spotify_client,
+    get_spotify_user_client,
 )
 
 
@@ -54,7 +54,8 @@ class UserPlaylist(models.Model):
             print("  Already up to date")
             return
         print(
-            f"Playlist {self.name} - checking for updates (DB snapshot ID {self.snapshot_id})"
+            f"Playlist {self.name} - checking for updates "
+            f"(DB snapshot ID {self.snapshot_id})"
         )
         print(f"  Spotify latest snapshot id is {current}, updating")
         self.snapshot_id = current
@@ -91,7 +92,10 @@ class UserPlaylist(models.Model):
         self.save()
 
     def __str__(self):
-        return f"(name={self.name}, user={self.user.user.email}, spotifyID={self.spotify_id})"
+        return (
+            f"(name={self.name}, user={self.user.user.email}, "
+            f"spotifyID={self.spotify_id})"
+        )
 
 
 class Track(models.Model):
@@ -110,8 +114,8 @@ class Track(models.Model):
         return ", ".join(self.artist_list)
 
     def get_features(self):
-        ## note: this is a VERY slow way of getting track features!
-        ## if possible, user UserPlaylist.update_track_features
+        # note: this is a VERY slow way of getting track features!
+        # if possible, user UserPlaylist.update_track_features
         if hasattr(self, "track_features"):
             return
         print(f"getting features for track '{self.name}'")

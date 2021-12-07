@@ -1,8 +1,9 @@
-from functools import wraps
 import datetime
 import logging
+from functools import wraps
 
-from django.contrib.auth import login, logout as auth_logout
+from django.contrib.auth import login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import is_password_usable, make_password
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,7 +11,6 @@ from django.shortcuts import render
 
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
 from .spotify_client_info import get_spotify_oauth, get_spotify_user_client, scopes
-
 
 logger = logging.getLogger(__name__)
 

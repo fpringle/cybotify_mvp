@@ -1,9 +1,7 @@
 import environ
-
-from spotipy import CacheHandler, Spotify
-from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
-
 from django.conf import settings
+from spotipy import CacheHandler, Spotify
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 
 env = environ.Env()
 environ.Env.read_env(settings.BASE_DIR / "cybotify" / ".env")
@@ -100,7 +98,7 @@ def get_all_playlist_tracks(sp, playlist_id):
             playlist_id,
             offset=offset,
             limit=50,
-            fields=f"items(track(id,name,artists(name),album(name),is_local)),next",
+            fields="items(track(id,name,artists(name),album(name),is_local)),next",
         )
 
         info.extend(
