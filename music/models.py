@@ -12,7 +12,7 @@ class UserPlaylist(models.Model):
     spotify_id = models.CharField(max_length=256)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
-    user = models.ForeignKey("SpotifyUser", on_delete=models.CASCADE)
+    user = models.ForeignKey("accounts.SpotifyUser", on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now=True)
 
     def get_latest_snapshot(self):
