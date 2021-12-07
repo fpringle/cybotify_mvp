@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from music.admin import UserPlaylistInlineAdmin
 
@@ -26,11 +26,10 @@ class SpotifyUserInlineAdmin(admin.StackedInline):
         if not obj.user:
             return "No spotify user is associated with this account."
 
-        return mark_safe(
-            '<a href="{}">{}</a>'.format(
-                reverse("admin:accounts_spotifyuser_change", args=(obj.pk,)),
-                obj.user.spotifyuser.spotify_id,
-            )
+        return format_html(
+            '<a href="{}">{}</a>',
+            reverse("admin:accounts_spotifyuser_change", args=(obj.pk,)),
+            obj.user.spotifyuser.spotify_id,
         )
 
     user_link.short_description = "Link"

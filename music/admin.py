@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html, format_html_join
 
 from .models import Track, TrackFeatures, UserPlaylist
 
@@ -51,15 +51,19 @@ class UserPlaylistAdmin(admin.ModelAdmin):
     readonly_fields = ("tracks", "last_updated")
 
     def tracks(self, obj):
-        def get_link(track):
-            return '<a href="{}">{}</a>'.format(
-                reverse("admin:music_track_change", args=(track.pk,)), track.name
-            )
-
         def get_li(track):
-            return "<li>" + get_link(track) + "</li>"
-
-        return mark_safe("<ul>" + "".join(map(get_li, obj.track_set.all())) + "</ul>")
+            list_items = format_html_join(
+                "\n",
+                '<li><a href="{}">{}</a></li>',
+                (
+                    (
+                        reverse("admin:music_track_change", args=(track.pk,)),
+                        track.name,
+                    )
+                    for track in obj.track_set.all()
+                ),
+            )
+            return format_html("<ul>{}</ul>", list_items)
 
 
 class UserPlaylistInlineAdmin(admin.TabularInline):
@@ -70,10 +74,10 @@ class UserPlaylistInlineAdmin(admin.TabularInline):
 
     @admin.display(description="Link")
     def link(self, obj):
-        return mark_safe(
-            '<a href="{}">{}</a>'.format(
-                reverse("admin:music_userplaylist_change", args=(obj.pk,)), obj.name
-            )
+        return format_html(
+            '<a href="{}">{}</a>',
+            reverse("admin:music_userplaylist_change", args=(obj.pk,)),
+            obj.name,
         )
 
 
