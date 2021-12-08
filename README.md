@@ -3,6 +3,15 @@
 
 ## Installation
 
+The Django DB module is plug-and-play i.e. it lets you choose the database backend.
+PostgreSQL is the best choice, but it's a pain in the ass to set up and it's not
+necessary during development. If you can't get it working, follow the "alternate
+sqlite set up" instrctions. Once you've set up the DB, follow the "django set up"
+instructions.
+
+
+
+### PostgreSQL set up
 1. install PostgreSQL
     ```bash
         sudo apt install postgresql
@@ -39,11 +48,27 @@
         local   all             all                                     peer    <--- change to md5
     ```
 
+### Alternate sqlite set up
+
+1. switch to branch 'dev/sqlite'
+    ```
+        git checkout dev/sqlite
+    ```
+2. install SQLite
+    ```
+        sudo apt install sqlite
+    ```
+
+
+### Django set up
+
 6. make migrations
     ```
-        ./manage.py makemigrations server
+        ./manage.py makemigrations accounts
         ./manage.py makemigrations auth
         ./manage.py makemigrations admin
+        ./manage.py makemigrations music
+        ./manage.py makemigrations stats
     ```
 
 7. run migrations
