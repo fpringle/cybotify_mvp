@@ -75,14 +75,15 @@ class UserPlaylist(models.Model):
         self.update_tracks()
 
     def update_track_features(self):
-        missing = self.track_set.filter(track_features=None)
+        missing = self.track_set.filter(track_features=None, features_unavailable=False)
         track_ids = [track.spotify_id for track in missing]
         sp = get_spotify_client()
         features = get_all_track_features(sp, track_ids)
         for track, features_data in zip(missing, features):
             if not features_data:
                 print("No track features available for track", track.name)
-                # should mark this somehow
+                track.features_unavailable = True
+                track.save()
                 continue
             print("Got track features for", track.name)
             track.track_features = TrackFeatures.objects.create(
@@ -116,6 +117,7 @@ class Track(models.Model):
     artists = models.CharField(max_length=256)
     album = models.CharField(max_length=256)
     playlist = models.ManyToManyField(UserPlaylist)
+    features_unavailable = models.BooleanField(default=False)
 
     @property
     def artist_list(self):
@@ -129,6 +131,8 @@ class Track(models.Model):
         # note: this is a VERY slow way of getting track features!
         # if possible, user UserPlaylist.update_track_features
         if hasattr(self, "track_features"):
+            return
+        if self.features_unavailable:
             return
         print(f"getting features for track '{self.name}'")
         sp = get_spotify_client()
