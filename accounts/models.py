@@ -59,9 +59,11 @@ class SpotifyUser(models.Model):
         self.user.spotifyusercredentials.check_expired()
         sp = get_spotify_user_client(self.user.spotifyusercredentials.access_token)
         playlists = get_all_playlists(sp)
-        # TODO: drop playlists that are no longer present
         for playlist in playlists:
             UserPlaylist.create_or_update(playlist, self)
+
+        playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
+        self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids)).delete()
 
 
 class SpotifyUserCredentials(models.Model):
