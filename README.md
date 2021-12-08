@@ -96,7 +96,18 @@ instructions.
         ./manage.py createsuperuser     # follow the prompt
     ```
 
-5. run server
+5. put your app's client credentials in cybotify/.env
+    ```
+        mv cybotify/.env_sample cybotify/.env
+        # cybotify.env
+        SPOTIFY_CLIENT_ID=CLIENT_ID_HERE
+        SPOTIFY_CLIENT_SECRET=CLIENT_SECRET_HERE
+        SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/accounts/new/callback    # leave this
+    ```
+
+6. set your app's redirect URI to http://127.0.0.1:8000/accounts/new/callback in the spotify dashboard
+
+6. run server
     ```
         ./manage.py runserver
     ```
