@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href={% static 'css/playlist_detail.css' %}>
+{% endblock css %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.7.0.min.js"></script>
+{{ ws_url|json_script:"ws_url" }}
+{% load static %}
+<script src="{% static 'js/features_ws.js' %}" type="application/javascript"></script>
+{% endblock scripts %}
+
+{% block content %}
+
+<div id="contentContainer">
+  <div id="playlistInfo">
+    <div id="playlistName">
+      <span id="playlist">{{ playlist.name }}</span>
+    </div>
+    <div id="trackContainer">
+    </div>
+  </div>
+
+  <div id="spiderPlot"/>
+<div>
+
+{% endblock %}

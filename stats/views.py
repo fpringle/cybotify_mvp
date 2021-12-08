@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden, JsonResponse
+from django.core.exceptions import PermissionDenied
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 
 from music.models import UserPlaylist
@@ -59,7 +60,7 @@ def get_playlist_average_features(playlist, fields=None):
 
     return {
         "name": playlist.name,
-        "length": len(tracks),
+        # "length": len(tracks),
         "features": track_features,
     }
 
@@ -87,14 +88,25 @@ def get_playlist_features(request, playlist_id):
 
 @login_required
 def playlist_detail(request, playlist_id):
-    playlist = UserPlaylist.objects.filter(pk=playlist_id).get()
+    if not UserPlaylist.objects.filter(pk=playlist_id).exists():
+        raise Http404("The playlist you're trying to look at doesn't exist")
+
+    playlist = UserPlaylist.objects.get(pk=playlist_id)
     if request.user != playlist.user.user:
-        return HttpResponseForbidden("That's not your playlist!")
+        raise PermissionDenied("That's not your playlist!")
 
-    playlist.check_update()
-    context = {
-        "playlist": playlist,
-        "features": get_playlist_average_features(playlist),
-    }
+    if playlist.needs_update()[0]:
+        print("playlist is out of date, updating")
+        context = {
+            "ws_url": f"/ws/playlist_detail/{playlist_id}/",
+        }
 
-    return render(request, "playlist_detail.html", context)
+        return render(request, "playlist_detail_ws.html", context)
+
+    else:
+        print("no need to update")
+        context = {
+            "playlist": playlist,
+            "features": get_playlist_average_features(playlist),
+        }
+        return render(request, "playlist_detail.html", context)

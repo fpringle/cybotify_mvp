@@ -52,7 +52,11 @@ class UserPlaylist(models.Model):
         sp = get_spotify_user_client(su.spotifyusercredentials.access_token)
         return sp.playlist(self.spotify_id, fields="snapshot_id")["snapshot_id"]
 
-    def update_tracks(self):
+    def needs_update(self):
+        current = self.get_latest_snapshot()
+        return (current != self.snapshot_id, current)
+
+    def update_tracks(self, get_features=True):
         su = self.user.user
         su.spotifyusercredentials.check_expired()
         sp = get_spotify_user_client(su.spotifyusercredentials.access_token)
@@ -81,11 +85,12 @@ class UserPlaylist(models.Model):
         to_delete = self.track_set.filter(~models.Q(spotify_id__in=track_ids))
         self.track_set.remove(*to_delete)
 
-        self.update_track_features()
+        if get_features:
+            self.update_track_features()
 
-    def check_update(self):
-        current = self.get_latest_snapshot()
-        if current == self.snapshot_id:
+    def check_update(self, get_features=True):
+        needs_update, current = self.needs_update()
+        if not needs_update:
             print("  Already up to date")
             return
         print(
@@ -94,7 +99,7 @@ class UserPlaylist(models.Model):
         )
         print(f"  Spotify latest snapshot id is {current}, updating")
 
-        self.update_tracks()
+        self.update_tracks(get_features)
         self.snapshot_id = current
 
     def update_track_features(self):
