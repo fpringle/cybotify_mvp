@@ -11,6 +11,7 @@ from accounts.spotify_client_info import (
 
 
 class UserPlaylist(models.Model):
+    # make spotify_id unique
     spotify_id = models.CharField(max_length=256)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
@@ -57,25 +58,29 @@ class UserPlaylist(models.Model):
         sp = get_spotify_user_client(su.spotifyusercredentials.access_token)
         tracks = get_all_playlist_tracks(sp, self.spotify_id)
         for track_data in tracks:
-            if Track.objects.filter(spotify_id=track_data["id"]).exists():
-                track = Track.objects.get(spotify_id=track_data["id"])
-                # track.get_features()
-                if not self.track_set.filter(pk=track.pk).exists():
-                    self.track_set.add(track)
-                continue
-            track = Track.objects.create(
-                spotify_id=track_data["id"],
-                name=track_data["name"],
-                artists=" =|AND|= ".join(
-                    artist["name"] for artist in track_data["artists"]
-                ),
-                album=track_data["album"]["name"],
+            artists = " =|AND|= ".join(
+                artist["name"] for artist in track_data["artists"]
             )
-            # track.get_features()
+            track, created = Track.objects.get_or_create(
+                spotify_id=track_data["id"],
+                defaults={
+                    "name": track_data["name"],
+                    "artists": artists,
+                    "album": track_data["album"]["name"],
+                },
+            )
+            if created or not self.track_set.filter(pk=track.pk).exists():
+                self.track_set.add(track)
+
             track.save()
             self.track_set.add(track)
 
         self.save()
+
+        track_ids = [tr["id"] for tr in tracks if "id" in tr]
+        to_delete = self.track_set.filter(~models.Q(spotify_id__in=track_ids))
+        self.track_set.remove(*to_delete)
+
         self.update_track_features()
 
     def check_update(self):
@@ -88,9 +93,9 @@ class UserPlaylist(models.Model):
             f"(DB snapshot ID {self.snapshot_id})"
         )
         print(f"  Spotify latest snapshot id is {current}, updating")
-        self.snapshot_id = current
-        # self.save()
+
         self.update_tracks()
+        self.snapshot_id = current
 
     def update_track_features(self):
         missing = self.track_set.filter(track_features=None, features_unavailable=False)
