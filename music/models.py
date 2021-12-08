@@ -12,7 +12,7 @@ from accounts.spotify_client_info import (
 
 class UserPlaylist(models.Model):
     # make spotify_id unique
-    spotify_id = models.CharField(max_length=256)
+    spotify_id = models.CharField(max_length=256, unique=True)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
     # TODO: make many-to-many
@@ -135,7 +135,7 @@ class UserPlaylist(models.Model):
 
 
 class Track(models.Model):
-    spotify_id = models.CharField(max_length=256)
+    spotify_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
     artists = models.CharField(max_length=256)
     album = models.CharField(max_length=256)

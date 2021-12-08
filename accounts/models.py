@@ -22,14 +22,13 @@ class RegistrationState(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.state_string = self.__class__.unique_random_string(16)
-        self.state_string = random_string(16)
+        self.state_string = self.__class__.unique_random_string(16)
 
     @classmethod
     def unique_random_string(cls, length):
-        string = random_string(16)
+        string = random_string(length)
         while cls.objects.filter(state_string=string).exists():
-            string = random_string(16)
+            string = random_string(length)
         return string
 
     class Meta:
@@ -50,7 +49,7 @@ class RegistrationState(models.Model):
 
 class SpotifyUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    spotify_id = models.CharField(max_length=256)
+    spotify_id = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return f"(email={self.user.email}, spotifyID={self.spotify_id})"
