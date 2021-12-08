@@ -37,6 +37,17 @@ class RegistrationState(models.Model):
         verbose_name = "User pending registration"
         verbose_name_plural = "Users pending registration"
 
+    @classmethod
+    def drop_before(cls, date_time):
+        if timezone.is_naive(date_time):
+            date_time = timezone.make_aware
+        cls.objects.filter(created_at__lt=date_time).delete()
+
+    @classmethod
+    def drop_older_than(cls, time_delta):
+        dt = timezone.now() - time_delta
+        cls.drop_before(dt)
+
 
 class SpotifyUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
