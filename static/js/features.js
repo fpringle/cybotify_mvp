@@ -1,3 +1,4 @@
+(function() {
 const plotSpider = (plotData) => {
   const fields = [
     'acousticness',
@@ -46,3 +47,5 @@ $(document).ready(() => {
   const values = features.features;
   plotSpider(values);
 });
+
+})();
