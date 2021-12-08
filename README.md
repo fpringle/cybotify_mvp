@@ -62,7 +62,15 @@ instructions.
 
 ### Django set up
 
-6. make migrations
+1. install python requirements
+    ```
+        pip install -r requirements.txt
+        # for dev:
+        pip install -r requirements_dev.txt (for git pre-commit hooks)
+        pre-commit install
+    ```
+
+2. make migrations
     ```
         ./manage.py makemigrations accounts
         ./manage.py makemigrations auth
@@ -71,17 +79,17 @@ instructions.
         ./manage.py makemigrations stats
     ```
 
-7. run migrations
+3. run migrations
     ```
         ./manage.py migrate
     ```
 
-8. create an admin user
+4. create an admin user
     ```
         ./manage.py createsuperuser     # follow the prompt
     ```
 
-9. run server
+5. run server
     ```
         ./manage.py runserver
     ```
