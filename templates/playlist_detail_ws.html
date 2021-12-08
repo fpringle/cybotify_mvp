@@ -3,6 +3,7 @@
 {% block css %}
 {% load static %}
 <link rel="stylesheet" href={% static 'css/playlist_detail.css' %}>
+<link rel="stylesheet" href={% static 'css/loader.css' %}>
 {% endblock css %}
 
 {% block scripts %}
@@ -17,9 +18,16 @@
 <div id="contentContainer">
   <div id="playlistInfo">
     <div id="playlistName">
-      <span id="playlist">{{ playlist.name }}</span>
+      <span id="playlist">Loading playlist...</span>
     </div>
     <div id="trackContainer">
+      {% comment "loader options" %}
+      Credits to https://loading.io/css/
+      <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+      <div class="lds-dual-ring"></div>
+      <div class="loader"></div>
+      {% endcomment %}
+      <div class="lds-ripple"><div></div><div></div></div>
     </div>
   </div>
 
