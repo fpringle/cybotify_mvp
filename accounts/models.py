@@ -8,7 +8,6 @@ from music.models import UserPlaylist
 
 from .spotify_client_info import (
     get_all_playlists,
-    get_playlist_status,
     get_spotify_oauth,
     get_spotify_user_client,
     scopes,
@@ -56,37 +55,13 @@ class SpotifyUser(models.Model):
     def __str__(self):
         return f"(email={self.user.email}, spotifyID={self.spotify_id})"
 
-    def new_playlist(self, playlist_data):
-        # print(playlist_data)
-        playlist = UserPlaylist.objects.create(
-            spotify_id=playlist_data["id"],
-            name=playlist_data["name"],
-            # snapshot_id=playlist_data["snapshot_id"],
-            user=self,
-            status=get_playlist_status(playlist_data),
-        )
-        playlist.save()
-        # playlist.update_tracks()
-
     def update_playlists(self):
         self.user.spotifyusercredentials.check_expired()
         sp = get_spotify_user_client(self.user.spotifyusercredentials.access_token)
         playlists = get_all_playlists(sp)
         # TODO: drop playlists that are no longer present
         for playlist in playlists:
-            spotify_id = playlist["id"]
-            # TODO: move this to UserPlaylist?
-            if UserPlaylist.objects.filter(spotify_id=spotify_id).exists():
-                pl = UserPlaylist.objects.get(spotify_id=spotify_id)
-                print("playlist", pl.name, "already exists")
-                print(playlist)
-                status = get_playlist_status(playlist)
-                print("status:", status)
-                if status != pl.status:
-                    pl.status = status
-                    pl.save()
-            else:
-                self.new_playlist(playlist)
+            UserPlaylist.create_or_update(playlist, self)
 
 
 class SpotifyUserCredentials(models.Model):

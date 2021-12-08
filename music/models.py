@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from accounts.spotify_client_info import (
     get_all_playlist_tracks,
     get_all_track_features,
+    get_playlist_status,
     get_spotify_client,
     get_spotify_user_client,
 )
@@ -26,6 +27,23 @@ class UserPlaylist(models.Model):
         max_length=2,
         choices=Status.choices,
     )
+
+    @classmethod
+    def create_or_update(cls, playlist_data, user=None):
+        spotify_id = playlist_data["id"]
+        if cls.objects.filter(spotify_id=spotify_id).exists():
+            pl = UserPlaylist.objects.get(spotify_id=spotify_id)
+            status = get_playlist_status(playlist_data)
+            if status != pl.status:
+                pl.status = status
+                pl.save()
+        else:
+            cls.objects.create(
+                spotify_id=playlist_data["id"],
+                name=playlist_data["name"],
+                user=user,
+                status=get_playlist_status(playlist_data),
+            )
 
     def get_latest_snapshot(self):
         su = self.user.user
