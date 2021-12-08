@@ -1,5 +1,5 @@
 (function() {
-const plotSpider = (plotData) => {
+const plotSpider = (...plotData) => {
   const fields = [
     'acousticness',
     'danceability',
@@ -15,29 +15,28 @@ const plotSpider = (plotData) => {
     'valence',
   ];
   const theta = fields.map(f => f[0].toUpperCase() + f.substr(1).toLowerCase());
-  const r = fields.map(f => plotData[f]);
-  const data = [{
-    type: 'scatterpolar',
-    //mode: 'lines+markers',
-    hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
-    hoverinfo: 'none',
-    r,
-    theta,
-    fill: 'toself',
-  }];
+  const data = plotData.map(pd => {
+    const r = fields.map(f => pd[f]);
+    return {
+      type: 'scatterpolar',
+      hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
+      hoverinfo: 'none',
+      r,
+      theta,
+      fill: 'toself',
+    };
+  });
   const layout = {
     polar: {
       radialaxis: {
         visible: true,
         range: [0, 1]
       },
-  //    bgcolor: '#A9A9A9',
     },
     showlegend: false,
     font: {
       size: 20,
     },
-    //paper_bgcolor: '#A9A9A9',
   };
   Plotly.newPlot('spiderPlot', data, layout);
 };
@@ -46,6 +45,18 @@ $(document).ready(() => {
   const features = JSON.parse($('#features').text());
   const values = features.features;
   plotSpider(values);
+  const track_features = features.track_features;
+  track_features.forEach(track => {
+    const id = track.id;
+    const elem = $('#track' + id);
+    const hoverOn = (e) => {
+      plotSpider(values, track);
+    };
+    const hoverOff = (e) => {
+      plotSpider(values);
+    };
+    elem.hover(hoverOn, hoverOff);
+  });
 });
 
 })();

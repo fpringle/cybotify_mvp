@@ -21,7 +21,7 @@
     </div>
     <div id="trackContainer">
       {% for track in playlist.track_set.all %}
-        <p class="trackInfo">
+        <p class="trackInfo" id="track{{ track.pk }}">
           {{ track.name }}
           <br>
           {{ track.artists_comma_separated }}

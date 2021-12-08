@@ -1,5 +1,5 @@
 (function() {
-const plotSpider = (plotData) => {
+const plotSpider = (...plotData) => {
   const fields = [
     'acousticness',
     'danceability',
@@ -15,29 +15,28 @@ const plotSpider = (plotData) => {
     'valence',
   ];
   const theta = fields.map(f => f[0].toUpperCase() + f.substr(1).toLowerCase());
-  const r = fields.map(f => plotData[f]);
-  const data = [{
-    type: 'scatterpolar',
-    //mode: 'lines+markers',
-    hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
-    hoverinfo: 'none',
-    r,
-    theta,
-    fill: 'toself',
-  }];
+  const data = plotData.map(pd => {
+    const r = fields.map(f => pd[f]);
+    return {
+      type: 'scatterpolar',
+      hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
+      hoverinfo: 'none',
+      r,
+      theta,
+      fill: 'toself',
+    };
+  });
   const layout = {
     polar: {
       radialaxis: {
         visible: true,
         range: [0, 1]
       },
-  //    bgcolor: '#A9A9A9',
     },
     showlegend: false,
     font: {
       size: 20,
     },
-    //paper_bgcolor: '#A9A9A9',
   };
   Plotly.newPlot('spiderPlot', data, layout);
 };
@@ -47,10 +46,13 @@ const setName = (name) => {
   $('#playlistName').append($('<span/>').text(name));
 };
 
+let playlistFeatures;
+
 const fillList = (trackData) => {
   $('#trackContainer').empty();
   trackData.forEach(track => {
     const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${track.artists}`);
+    p.attr('id', 'track' + track.id);
     $('#trackContainer').append(p);
   });
 };
@@ -74,7 +76,20 @@ $(document).ready(() => {
     const data = JSON.parse(e.data);
     if (data?.features) {
       // final stage
+      playlistFeatures = data.features;
       plotSpider(data.features);
+      console.log(data.track_features);
+      data.track_features.forEach(track => {
+        const elem = $('#track' + track.id);
+        const hoverOn = (e) => {
+          plotSpider(playlistFeatures, track);
+        };
+        const hoverOff = (e) => {
+          plotSpider(playlistFeatures);
+        };
+        console.log("hover")
+        elem.hover(hoverOn, hoverOff);
+      });
     } else if (data?.tracks) {
       // second stage
       fillList(data.tracks);

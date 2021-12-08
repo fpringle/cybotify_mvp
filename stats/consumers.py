@@ -39,7 +39,11 @@ class PlaylistDetailConsumer(JsonWebsocketConsumer):
 
         self.playlist.check_update(get_features=False)
         track_data = [
-            {"name": track.name, "artists": track.artists_comma_separated}
+            {
+                "id": track.pk,
+                "name": track.name,
+                "artists": track.artists_comma_separated,
+            }
             for track in self.playlist.track_set.all()
         ]
         data["tracks"] = track_data
@@ -49,4 +53,5 @@ class PlaylistDetailConsumer(JsonWebsocketConsumer):
 
         features = get_playlist_average_features(self.playlist)
         data["features"] = features["features"]
+        data["track_features"] = features["track_features"]
         self.send_json(data, close=True)

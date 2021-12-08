@@ -109,11 +109,9 @@ class UserPlaylist(models.Model):
         features = get_all_track_features(sp, track_ids)
         for track, features_data in zip(missing, features):
             if not features_data:
-                print("No track features available for track", track.name)
                 track.features_unavailable = True
                 track.save()
                 continue
-            print("Got track features for", track.name)
             track.track_features = TrackFeatures.objects.create(
                 track=track,
                 acousticness=features_data["acousticness"],
