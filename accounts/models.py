@@ -64,6 +64,18 @@ class SpotifyUser(models.Model):
         playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
         self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids)).delete()
 
+    @property
+    def public_playlists(self):
+        return self.userplaylist_set.filter(status="PU")
+
+    @property
+    def private_playlists(self):
+        return self.userplaylist_set.filter(status="PR")
+
+    @property
+    def collaborative_playlists(self):
+        return self.userplaylist_set.filter(status="CO")
+
 
 class SpotifyUserCredentials(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
