@@ -69,4 +69,7 @@ body {
 #spiderPlot {
   flex:2;
   padding:15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
