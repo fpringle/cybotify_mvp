@@ -102,8 +102,8 @@ def playlist_detail(request, playlist_id):
         raise Http404("The playlist you're trying to look at doesn't exist")
 
     playlist = UserPlaylist.objects.get(pk=playlist_id)
-    if request.user != playlist.user.user:
-        raise PermissionDenied("That's not your playlist!")
+    if not playlist.is_user_allowed(request.user):
+        raise PermissionDenied("You don't have permission to view that playlist.")
 
     if playlist.needs_update()[0]:
         print("playlist is out of date, updating")

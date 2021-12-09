@@ -16,7 +16,8 @@ class UserPlaylist(models.Model):
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
     # TODO: make many-to-many
-    user = models.ForeignKey("accounts.SpotifyUser", on_delete=models.CASCADE)
+    users = models.ManyToManyField("accounts.SpotifyUser")
+    owner = models.CharField(max_length=256)
     last_updated = models.DateTimeField(auto_now=True)
 
     class Status(models.TextChoices):
@@ -35,21 +36,44 @@ class UserPlaylist(models.Model):
         if cls.objects.filter(spotify_id=spotify_id).exists():
             pl = UserPlaylist.objects.get(spotify_id=spotify_id)
             status = get_playlist_status(playlist_data)
-            if status != pl.status:
+            if status != pl.status or playlist_data["owner"]["id"] != pl.owner:
                 pl.status = status
+                pl.owner = playlist_data["owner"]["id"]
                 pl.save()
         else:
-            cls.objects.create(
+            pl = cls.objects.create(
                 spotify_id=playlist_data["id"],
                 name=playlist_data["name"],
-                user=user,
                 status=get_playlist_status(playlist_data),
+                owner=playlist_data["owner"]["id"],
             )
+            if user is not None:
+                pl.user.add(user)
+
+    def is_user_allowed(self, user):
+        if self.status == "PU":
+            # anyone can view a public playlist
+            return True
+        else:
+            # private playlists can only be seen by their owner,
+            # collab playlists can be seen by any collaborators
+            return self.users.filter(user__id=user.id).exists()
+
+    def get_client(self):
+        if self.status == "PU":
+            return get_spotify_client()
+        else:
+            if not self.users.all().exists():
+                raise Exception(
+                    "We don't have credentials for any of the "
+                    f"collaborators on playlist {self.pk}"
+                )
+            user = self.users.first().user
+            user.credentials.check_expired()
+            return get_spotify_user_client(user.credentials.access_token)
 
     def get_latest_snapshot(self):
-        su = self.user.user
-        su.credentials.check_expired()
-        sp = get_spotify_user_client(su.credentials.access_token)
+        sp = self.get_client()
         return sp.playlist(self.spotify_id, fields="snapshot_id")["snapshot_id"]
 
     def needs_update(self):
@@ -57,9 +81,7 @@ class UserPlaylist(models.Model):
         return (current != self.snapshot_id, current)
 
     def update_tracks(self, get_features=True):
-        su = self.user.user
-        su.credentials.check_expired()
-        sp = get_spotify_user_client(su.credentials.access_token)
+        sp = self.get_client()
         tracks = get_all_playlist_tracks(sp, self.spotify_id)
         for track_data in tracks:
             artists = " =|AND|= ".join(
@@ -82,8 +104,8 @@ class UserPlaylist(models.Model):
         self.save()
 
         track_ids = [tr["id"] for tr in tracks if "id" in tr]
-        to_delete = self.track_set.filter(~models.Q(spotify_id__in=track_ids))
-        self.track_set.remove(*to_delete)
+        to_remove = self.track_set.filter(~models.Q(spotify_id__in=track_ids))
+        self.track_set.remove(*to_remove)
 
         if get_features:
             self.update_track_features()
@@ -132,8 +154,7 @@ class UserPlaylist(models.Model):
 
     def __str__(self):
         return (
-            f"(name={self.name}, user={self.user.user.email}, "
-            f"spotifyID={self.spotify_id})"
+            f"(name={self.name}, status={self.status}, " f"spotifyID={self.spotify_id})"
         )
 
 

@@ -4,9 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.utils.html import format_html
-
-from music.admin import UserPlaylistInlineAdmin
+from django.utils.html import format_html, format_html_join
 
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials
 
@@ -37,7 +35,25 @@ class SpotifyUserInlineAdmin(admin.StackedInline):
 
 class SpotifyUserAdmin(admin.ModelAdmin):
     model = SpotifyUser
-    inlines = [UserPlaylistInlineAdmin]
+    fields = ("user", "spotify_id", "_playlists")
+    readonly_fields = ("_playlists",)
+
+    @admin.display(description="Playlists")
+    def _playlists(self, obj):
+        list_items = format_html_join(
+            "\n",
+            '<li><a href="{}">{}</a></li>',
+            (
+                (
+                    reverse("admin:music_userplaylist_change", args=(playlist.pk,)),
+                    playlist.name,
+                )
+                for playlist in sorted(
+                    obj.userplaylist_set.all(), key=lambda pl: pl.name
+                )
+            ),
+        )
+        return format_html("<ul>{}</ul>", list_items)
 
 
 class SpotifyUserCredentialsAdmin(admin.StackedInline):

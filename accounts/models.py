@@ -62,7 +62,8 @@ class SpotifyUser(models.Model):
             UserPlaylist.create_or_update(playlist, self)
 
         playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
-        self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids)).delete()
+        to_remove = self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids))
+        self.userplaylist_set.remove(*to_remove)
 
     @property
     def public_playlists(self):

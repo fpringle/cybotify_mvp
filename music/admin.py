@@ -44,41 +44,41 @@ class UserPlaylistAdmin(admin.ModelAdmin):
         "spotify_id",
         "snapshot_id",
         "name",
-        "user",
+        "_users",
         "tracks",
         "last_updated",
+        "owner",
     )
-    readonly_fields = ("tracks", "last_updated")
+    readonly_fields = ("tracks", "last_updated", "_users")
 
     def tracks(self, obj):
-        def get_li(track):
-            list_items = format_html_join(
-                "\n",
-                '<li><a href="{}">{}</a></li>',
+        list_items = format_html_join(
+            "\n",
+            '<li><a href="{}">{}</a></li>',
+            (
                 (
-                    (
-                        reverse("admin:music_track_change", args=(track.pk,)),
-                        track.name,
-                    )
-                    for track in obj.track_set.all()
-                ),
-            )
-            return format_html("<ul>{}</ul>", list_items)
-
-
-class UserPlaylistInlineAdmin(admin.TabularInline):
-    model = UserPlaylist
-    extra = 0
-    fields = ("name", "link", "spotify_id", "snapshot_id", "last_updated")
-    readonly_fields = ("link", "last_updated")
-
-    @admin.display(description="Link")
-    def link(self, obj):
-        return format_html(
-            '<a href="{}">{}</a>',
-            reverse("admin:music_userplaylist_change", args=(obj.pk,)),
-            obj.name,
+                    reverse("admin:music_track_change", args=(track.pk,)),
+                    track.name,
+                )
+                for track in sorted(obj.track_set.all(), key=lambda tr: tr.name)
+            ),
         )
+        return format_html("<ul>{}</ul>", list_items)
+
+    @admin.display(description="Users")
+    def _users(self, obj):
+        list_items = format_html_join(
+            "\n",
+            '<li><a href="{}">{}</a></li>',
+            (
+                (
+                    reverse("admin:accounts_spotifyuser_change", args=(user.pk,)),
+                    user.spotify_id,
+                )
+                for user in obj.users.all()
+            ),
+        )
+        return format_html("<ul>{}</ul>", list_items)
 
 
 admin.site.register(Track, TrackAdmin)
