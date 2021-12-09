@@ -18,7 +18,8 @@ const fillList = (data) => {
 
 const filterByStatus = (data, status) => {
   console.log("filter by status = " + status);
-  fillList(data.filter(d => d.status == status));
+  if (status !== "ALL") data = data.filter(d => d.status == status);
+  fillList(data);
 };
 
 let currentFilter = "ALL";
@@ -27,14 +28,13 @@ let currentFilter = "ALL";
 $(document).ready(() => {
   const playlists = JSON.parse($('#playlists').text());
 
-  fillList(playlists);
+  filterByStatus(playlists, $('#filter').val());
 
   $('#filter').change(function() {
     const newFilter = $(this).val();
     if (newFilter === currentFilter) return;
     currentFilter = newFilter;
-    if (newFilter === "ALL") fillList(playlists);
-    else filterByStatus(playlists, newFilter);
+    filterByStatus(playlists, newFilter);
   });
 
 });
