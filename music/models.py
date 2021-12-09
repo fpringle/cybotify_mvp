@@ -48,8 +48,8 @@ class UserPlaylist(models.Model):
 
     def get_latest_snapshot(self):
         su = self.user.user
-        su.spotifyusercredentials.check_expired()
-        sp = get_spotify_user_client(su.spotifyusercredentials.access_token)
+        su.credentials.check_expired()
+        sp = get_spotify_user_client(su.credentials.access_token)
         return sp.playlist(self.spotify_id, fields="snapshot_id")["snapshot_id"]
 
     def needs_update(self):
@@ -58,8 +58,8 @@ class UserPlaylist(models.Model):
 
     def update_tracks(self, get_features=True):
         su = self.user.user
-        su.spotifyusercredentials.check_expired()
-        sp = get_spotify_user_client(su.spotifyusercredentials.access_token)
+        su.credentials.check_expired()
+        sp = get_spotify_user_client(su.credentials.access_token)
         tracks = get_all_playlist_tracks(sp, self.spotify_id)
         for track_data in tracks:
             artists = " =|AND|= ".join(

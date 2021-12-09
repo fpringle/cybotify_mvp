@@ -55,8 +55,8 @@ class SpotifyUser(models.Model):
         return f"(email={self.user.email}, spotifyID={self.spotify_id})"
 
     def update_playlists(self):
-        self.user.spotifyusercredentials.check_expired()
-        sp = get_spotify_user_client(self.user.spotifyusercredentials.access_token)
+        self.user.credentials.check_expired()
+        sp = get_spotify_user_client(self.user.credentials.access_token)
         playlists = get_all_playlists(sp)
         for playlist in playlists:
             UserPlaylist.create_or_update(playlist, self)
@@ -78,7 +78,9 @@ class SpotifyUser(models.Model):
 
 
 class SpotifyUserCredentials(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="credentials"
+    )
     access_token = models.CharField(max_length=400)
     refresh_token = models.CharField(max_length=400)
     expires_at = models.DateTimeField()

@@ -6,5 +6,5 @@ from .models import SpotifyUser
 
 @receiver(pre_delete, sender=SpotifyUser)
 def delete_spotify_user(sender, instance, using, **kwargs):
-    if instance.user and instance.user.spotifyusercredentials:
-        instance.user.spotifyusercredentials.delete()
+    if instance.user and instance.user.credentials:
+        instance.user.credentials.delete()
