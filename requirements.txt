@@ -3,4 +3,3 @@ django
 django-environ
 django-extensions
 psycopg2
-spotipy

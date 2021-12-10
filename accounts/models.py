@@ -97,8 +97,8 @@ class SpotifyUserCredentials(models.Model):
         return self.expires_at <= timezone.now()
 
     def refresh(self):
-        sp = get_spotify_oauth(scopes)
-        token_info = sp.refresh_access_token(self.refresh_token)
+        oauth = get_spotify_oauth(scopes)
+        token_info = oauth.refresh_access_token(self.refresh_token)
         self.access_token = token_info["access_token"]
         self.refresh_token = token_info["refresh_token"]
         self.expires_at = datetime.datetime.fromtimestamp(
