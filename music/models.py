@@ -33,6 +33,13 @@ class UserPlaylist(models.Model):
                 pl.status = status
                 pl.owner = playlist_data["owner"]["id"]
                 pl.save()
+            if (
+                user is not None
+                and user is not None
+                and not pl.users.filter(user_id=user.id).exists()
+            ):
+                pl.users.add(user)
+
         else:
             pl = cls.objects.create(
                 spotify_id=playlist_data["id"],
@@ -41,7 +48,7 @@ class UserPlaylist(models.Model):
                 owner=playlist_data["owner"]["id"],
             )
             if user is not None:
-                pl.user.add(user)
+                pl.users.add(user)
 
     def is_user_allowed(self, user):
         if self.status == "PU":
