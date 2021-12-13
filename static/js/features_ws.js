@@ -38,6 +38,7 @@ const plotSpider = (...plotData) => {
       size: 20,
     },
   };
+  $('#spiderPlot').empty();
   Plotly.newPlot('spiderPlot', data, layout);
 };
 
@@ -58,18 +59,6 @@ const fillList = (trackData) => {
 };
 
 $(document).ready(() => {
-
-  const emptyData = {
-    acousticness: 0,
-    danceability: 0,
-    energy: 0,
-    instrumentalness: 0,
-    liveness: 0,
-    speechiness: 0,
-    valence: 0
-  };
-  plotSpider(emptyData);
-
   const url = JSON.parse($('#ws_url').text());
   const socket = new WebSocket('ws://' + window.location.host + url);
   socket.onmessage = (e) => {
