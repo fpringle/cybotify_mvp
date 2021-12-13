@@ -37,6 +37,7 @@ repos:
           - --ignore=E203,W503
           - --max-complexity=25
           - --max-line-length=88
+          - --exclude=spotipy/*
 
   - repo: https://github.com/pycqa/bandit
     rev: 1.6.2

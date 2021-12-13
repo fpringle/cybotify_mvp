@@ -9,8 +9,8 @@ from django.contrib.auth.hashers import is_password_usable, make_password
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
+from . import SpotifyManager
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
-from .spotify_client_info import get_spotify_oauth, get_spotify_user_client, scopes
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +22,7 @@ def new_user(request):
         reg.user = request.user
     reg.save()
     logger.info("Generated state string: %s", reg.state_string)
-    oauth = get_spotify_oauth(scopes)
-    url = oauth.get_authorize_url(state=reg.state_string)
+    url = SpotifyManager.authorize_url(reg.state_string)
     logger.info("Redirecting user to: %s", url)
     return HttpResponseRedirect(url)
 
@@ -51,11 +50,9 @@ def handle_spotify_auth_response(request):
 
     reg = query.get()
 
-    oauth = get_spotify_oauth(scopes)
-
     logger.info("Getting access token from Spotify API")
 
-    token_info = oauth.get_access_token(code)
+    token_info = SpotifyManager.get_tokens(code)
 
     access_token = token_info["access_token"]
     refresh_token = token_info["refresh_token"]
@@ -67,8 +64,7 @@ def handle_spotify_auth_response(request):
     logger.info("Refresh token: %s", refresh_token)
     logger.info("Expires at: %s", expires_at)
 
-    sp = get_spotify_user_client(access_token)
-    user_info = sp.current_user()
+    user_info = SpotifyManager.user_client(access_token).current_user()
 
     spotify_id = user_info["id"]
     print("spotify id:", spotify_id)

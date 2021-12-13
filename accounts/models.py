@@ -6,12 +6,7 @@ from django.utils import timezone
 
 from music.models import UserPlaylist
 
-from .spotify_client_info import (
-    get_all_playlists,
-    get_spotify_oauth,
-    get_spotify_user_client,
-    scopes,
-)
+from . import SpotifyManager
 from .util import random_string
 
 
@@ -56,8 +51,7 @@ class SpotifyUser(models.Model):
 
     def update_playlists(self):
         self.user.credentials.check_expired()
-        sp = get_spotify_user_client(self.user.credentials.access_token)
-        playlists = get_all_playlists(sp)
+        playlists = SpotifyManager.get_playlists(self.user.credentials.access_token)
         for playlist in playlists:
             UserPlaylist.create_or_update(playlist, self)
 
@@ -97,8 +91,7 @@ class SpotifyUserCredentials(models.Model):
         return self.expires_at <= timezone.now()
 
     def refresh(self):
-        sp = get_spotify_oauth(scopes)
-        token_info = sp.refresh_access_token(self.refresh_token)
+        token_info = SpotifyManager.refresh_tokens(self.refresh_token)
         self.access_token = token_info["access_token"]
         self.refresh_token = token_info["refresh_token"]
         self.expires_at = datetime.datetime.fromtimestamp(

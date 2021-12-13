@@ -1,13 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from accounts.spotify_client_info import (
-    get_all_playlist_tracks,
-    get_all_track_features,
-    get_playlist_status,
-    get_spotify_client,
-    get_spotify_user_client,
-)
+from accounts import SpotifyManager
 
 
 class UserPlaylist(models.Model):
@@ -15,7 +9,6 @@ class UserPlaylist(models.Model):
     spotify_id = models.CharField(max_length=256, unique=True)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
-    # TODO: make many-to-many
     users = models.ManyToManyField("accounts.SpotifyUser")
     owner = models.CharField(max_length=256)
     last_updated = models.DateTimeField(auto_now=True)
@@ -33,22 +26,25 @@ class UserPlaylist(models.Model):
     @classmethod
     def create_or_update(cls, playlist_data, user=None):
         spotify_id = playlist_data["id"]
-        if cls.objects.filter(spotify_id=spotify_id).exists():
+        status = SpotifyManager.get_playlist_status(playlist_data)
+        owner = playlist_data["owner"]["id"]
+        try:
             pl = UserPlaylist.objects.get(spotify_id=spotify_id)
-            status = get_playlist_status(playlist_data)
-            if status != pl.status or playlist_data["owner"]["id"] != pl.owner:
+            if status != pl.status or owner != pl.owner:
                 pl.status = status
-                pl.owner = playlist_data["owner"]["id"]
+                pl.owner = owner
                 pl.save()
-        else:
+            if user is not None and not pl.users.filter(user_id=user.id).exists():
+                pl.users.add(user)
+        except UserPlaylist.DoesNotExist:
             pl = cls.objects.create(
-                spotify_id=playlist_data["id"],
+                spotify_id=spotify_id,
                 name=playlist_data["name"],
-                status=get_playlist_status(playlist_data),
-                owner=playlist_data["owner"]["id"],
+                status=status,
+                owner=owner,
             )
             if user is not None:
-                pl.user.add(user)
+                pl.users.add(user)
 
     def is_user_allowed(self, user):
         if self.status == "PU":
@@ -61,7 +57,7 @@ class UserPlaylist(models.Model):
 
     def get_client(self):
         if self.status == "PU":
-            return get_spotify_client()
+            return SpotifyManager.app_client
         else:
             if not self.users.all().exists():
                 raise Exception(
@@ -70,7 +66,7 @@ class UserPlaylist(models.Model):
                 )
             user = self.users.first().user
             user.credentials.check_expired()
-            return get_spotify_user_client(user.credentials.access_token)
+            return SpotifyManager.user_client(user.credentials.access_token)
 
     def get_latest_snapshot(self):
         sp = self.get_client()
@@ -82,7 +78,7 @@ class UserPlaylist(models.Model):
 
     def update_tracks(self, get_features=True):
         sp = self.get_client()
-        tracks = get_all_playlist_tracks(sp, self.spotify_id)
+        tracks = SpotifyManager.get_playlist_tracks(sp, self.spotify_id)
         for track_data in tracks:
             artists = " =|AND|= ".join(
                 artist["name"] for artist in track_data["artists"]
@@ -127,8 +123,7 @@ class UserPlaylist(models.Model):
     def update_track_features(self):
         missing = self.track_set.filter(track_features=None, features_unavailable=False)
         track_ids = [track.spotify_id for track in missing]
-        sp = get_spotify_client()
-        features = get_all_track_features(sp, track_ids)
+        features = SpotifyManager.get_track_features(track_ids)
         for track, features_data in zip(missing, features):
             if not features_data:
                 track.features_unavailable = True
@@ -182,9 +177,7 @@ class Track(models.Model):
         if self.features_unavailable:
             return
         print(f"getting features for track '{self.name}'")
-        sp = get_spotify_client()
-        track_features_data = sp.audio_features(self.spotify_id)[0]
-        print(track_features_data)
+        track_features_data = SpotifyManager.get_track_features([self.spotify_id])[0]
         self.track_features = TrackFeatures(
             track=self,
             acousticness=track_features_data["acousticness"],
