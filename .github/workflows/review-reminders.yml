@@ -1,7 +1,5 @@
 name: Review reminders
-on:
-  schedule:
-    - cron: '15 12 */2 * *'
+on: [workflow_dispatch]
 jobs:
   Review-reminders:
     name: Review reminders
