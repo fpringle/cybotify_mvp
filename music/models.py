@@ -33,11 +33,7 @@ class UserPlaylist(models.Model):
                 pl.status = status
                 pl.owner = playlist_data["owner"]["id"]
                 pl.save()
-            if (
-                user is not None
-                and user is not None
-                and not pl.users.filter(user_id=user.id).exists()
-            ):
+            if user is not None and not pl.users.filter(user_id=user.id).exists():
                 pl.users.add(user)
 
         else:
