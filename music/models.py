@@ -26,22 +26,22 @@ class UserPlaylist(models.Model):
     @classmethod
     def create_or_update(cls, playlist_data, user=None):
         spotify_id = playlist_data["id"]
-        if cls.objects.filter(spotify_id=spotify_id).exists():
+        status = SpotifyManager.get_playlist_status(playlist_data)
+        owner = playlist_data["owner"]["id"]
+        try:
             pl = UserPlaylist.objects.get(spotify_id=spotify_id)
-            status = SpotifyManager.get_playlist_status(playlist_data)
-            if status != pl.status or playlist_data["owner"]["id"] != pl.owner:
+            if status != pl.status or owner != pl.owner:
                 pl.status = status
-                pl.owner = playlist_data["owner"]["id"]
+                pl.owner = owner
                 pl.save()
             if user is not None and not pl.users.filter(user_id=user.id).exists():
                 pl.users.add(user)
-
-        else:
+        except UserPlaylist.DoesNotExist:
             pl = cls.objects.create(
-                spotify_id=playlist_data["id"],
+                spotify_id=spotify_id,
                 name=playlist_data["name"],
-                status=SpotifyManager.get_playlist_status(playlist_data),
-                owner=playlist_data["owner"]["id"],
+                status=status,
+                owner=owner,
             )
             if user is not None:
                 pl.users.add(user)
