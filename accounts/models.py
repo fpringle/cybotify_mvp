@@ -88,7 +88,7 @@ class SpotifyUserCredentials(models.Model):
         if not self.expires_at:
             return True
 
-        return self.expires_at <= timezone.now()
+        return self.expires_at <= timezone.now() + timezone.timedelta(minutes=1)
 
     def refresh(self):
         token_info = SpotifyManager.refresh_tokens(self.refresh_token)
