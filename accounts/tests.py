@@ -5,6 +5,16 @@ from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
 
 
 class RegistrationStateTestCase(TestCase):
+    """
+    Test model RegistrationState and its manager class RegistrationStateManager
+    """
+
+    def setUp(self):
+        """
+        Clear the db for each test
+        """
+        RegistrationState.objects.all().delete()
+
     def test_state_strings_are_unique(self):
         """
         Check if the randomly-generated state strings are guaranteed unique
@@ -16,17 +26,18 @@ class RegistrationStateTestCase(TestCase):
         """
         strings = set()
         for _ in range(250):
-            state_string = RegistrationState.unique_random_string(2)
+            state_string = RegistrationState.objects.unique_random_string(2)
             self.assertNotIn(state_string, strings)
             strings.add(state_string)
-            reg = RegistrationState.objects.create()
+            reg = RegistrationState.objects.create_state()
             reg.state_string = state_string
             reg.save()
 
-    def setUp(self):
-        RegistrationState.objects.all().delete()
-
     def test_drop_older_than(self):
+        """
+        Test that RegistrationStateManager.drop_before works as intended
+        """
+
         def strings():
             return sorted(reg.state_string for reg in RegistrationState.objects.all())
 
@@ -35,12 +46,19 @@ class RegistrationStateTestCase(TestCase):
         times = [(2021, 12, 14, 11), (2021, 12, 14, 12), (2021, 12, 14, 13)]
         times = [timezone.datetime(*args, tzinfo=timezone.utc) for args in times]
         for time in times:
-            reg = RegistrationState()
-            reg.save()
+            reg = RegistrationState.objects.create_state()
             reg.state_string = str(time.hour)
             reg.created_at = time
             reg.save()
 
         self.assertEqual(strings(), ["11", "12", "13"])
-        RegistrationState.drop_before(times[2])
+        RegistrationState.objects.drop_before(times[2])
         self.assertEqual(strings(), ["13"])
+
+    def test_created_at_autonow(self):
+        """
+        RegistrationState.created_at should be automatically set now on creation
+        """
+        now = timezone.now()
+        reg = RegistrationState.objects.create_state()
+        self.assertAlmostEqual(now.timestamp(), reg.created_at.timestamp(), places=2)
