@@ -11,7 +11,7 @@ from .util import random_string
 
 
 class RegistrationState(models.Model):
-    state_string = models.CharField(max_length=16)
+    state_string = models.CharField(max_length=16, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
