@@ -1,7 +1,54 @@
+from unittest import mock
+
+from django.contrib.auth.hashers import make_password
 from django.test import TestCase
 from django.utils import timezone
 
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User  # noqa
+
+DEFAULT_USERNAME = "user"
+DEFAULT_EMAIL = "user@user.com"
+DEFAULT_FIRSTNAME = "firstname"
+DEFAULT_LASTNAME = "lastname"
+DEFAULT_SPOTIFY_ID = "spotify_id"
+DEFAULT_PASSWORD = "password"
+DEFAULT_ACCESS_TOKEN = "ACCESS_TOKEN"
+DEFAULT_REFRESH_TOKEN = "REFRESH_TOKEN"
+DEFAULT_EXPIRES_AT = timezone.datetime(2021, 12, 1, tzinfo=timezone.utc)
+
+
+# fixtures
+def create_user_with_spotify_user_and_credentials(
+    username=DEFAULT_USERNAME,
+    email=DEFAULT_EMAIL,
+    first_name=DEFAULT_FIRSTNAME,
+    last_name=DEFAULT_LASTNAME,
+    password=DEFAULT_PASSWORD,
+    spotify_id=DEFAULT_SPOTIFY_ID,
+    hash_password=False,
+    access_token=DEFAULT_ACCESS_TOKEN,
+    refresh_token=DEFAULT_REFRESH_TOKEN,
+    expires_at=DEFAULT_EXPIRES_AT,
+):
+    user = User.objects.create(
+        username=username,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        password=make_password(password) if hash_password else password,
+    )
+    spotify_user = SpotifyUser.objects.create(
+        user=user,
+        spotify_id=spotify_id,
+    )
+    credentials = SpotifyUserCredentials.objects.create(
+        user=user,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_at=expires_at,
+    )
+
+    return user, spotify_user, credentials
 
 
 class RegistrationStateTestCase(TestCase):
@@ -62,3 +109,27 @@ class RegistrationStateTestCase(TestCase):
         now = timezone.now()
         reg = RegistrationState.objects.create_state()
         self.assertAlmostEqual(now.timestamp(), reg.created_at.timestamp(), places=2)
+
+
+def fake_refresh_token(refresh_token):
+    return {
+        "access_token": DEFAULT_ACCESS_TOKEN,
+        "refresh_token": DEFAULT_REFRESH_TOKEN,
+        "expires_at": (timezone.now() + timezone.timedelta(hours=1)).timestamp(),
+    }
+
+
+class UserCredentialsTestCase(TestCase):
+    def setUp(self):
+        _user = create_user_with_spotify_user_and_credentials()
+        self.user, self.spotify_user, self.credentials = _user
+
+    def test_expired(self):
+        self.assertTrue(self.user.credentials.has_expired)
+
+    @mock.patch(
+        "accounts.SpotifyManager.refresh_tokens", side_effect=fake_refresh_token
+    )
+    def test_refresh(self, mock_refresh):
+        self.user.credentials.refresh()
+        self.assertFalse(self.user.credentials.has_expired)
