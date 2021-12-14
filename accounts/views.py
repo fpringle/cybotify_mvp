@@ -33,7 +33,6 @@ def handle_spotify_auth_response(request):
     state = request.GET.get("state")
 
     if (not code) or (not state):
-        # TODO: log
         return HttpResponse("Bad response from Spotify", status=502)
 
     logger.info("Auth code: %s", code)
@@ -41,7 +40,6 @@ def handle_spotify_auth_response(request):
 
     query = RegistrationState.objects.filter(state_string=state)
     if not query.exists():
-        # TODO: log
         return HttpResponse("Bad response from Spotify", status=502)
 
     reg = query.get()
