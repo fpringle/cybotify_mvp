@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def new_user(request):
     logger.info("Request for new user")
-    reg = RegistrationState()
+    reg = RegistrationState.objects.create_state()
     if request.user.is_authenticated:
         reg.user = request.user
     reg.save()

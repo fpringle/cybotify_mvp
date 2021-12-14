@@ -10,36 +10,37 @@ from . import SpotifyManager
 from .util import random_string
 
 
-class RegistrationState(models.Model):
-    state_string = models.CharField(max_length=16, unique=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.state_string = self.__class__.unique_random_string(16)
-
-    @classmethod
-    def unique_random_string(cls, length):
+class RegistrationStateManager(models.Manager):
+    def unique_random_string(self, length):
         string = random_string(length)
-        while cls.objects.filter(state_string=string).exists():
+        while self.filter(state_string=string).exists():
             string = random_string(length)
         return string
+
+    def create_state(self, *args, **kwargs):
+        state_string = self.unique_random_string(16)
+        kwargs["state_string"] = state_string
+        return self.create(*args, **kwargs)
+
+    def drop_before(self, date_time):
+        if timezone.is_naive(date_time):
+            date_time = timezone.make_aware
+        self.filter(created_at__lt=date_time).delete()
+
+    def drop_older_than(self, time_delta):
+        dt = timezone.now() - time_delta
+        self.drop_before(dt)
+
+
+class RegistrationState(models.Model):
+    state_string = models.CharField(max_length=16)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    objects = RegistrationStateManager()
 
     class Meta:
         verbose_name = "User pending registration"
         verbose_name_plural = "Users pending registration"
-
-    @classmethod
-    def drop_before(cls, date_time):
-        if timezone.is_naive(date_time):
-            date_time = timezone.make_aware
-        cls.objects.filter(created_at__lt=date_time).delete()
-
-    @classmethod
-    def drop_older_than(cls, time_delta):
-        dt = timezone.now() - time_delta
-        cls.drop_before(dt)
 
 
 class SpotifyUser(models.Model):
@@ -53,7 +54,7 @@ class SpotifyUser(models.Model):
         self.user.credentials.check_expired()
         playlists = SpotifyManager.get_playlists(self.user.credentials.access_token)
         for playlist in playlists:
-            UserPlaylist.create_or_update(playlist, self)
+            UserPlaylist.objects.create_or_update(playlist, self)
 
         playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
         to_remove = self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids))
