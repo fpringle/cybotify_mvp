@@ -33,20 +33,16 @@ def handle_spotify_auth_response(request):
     state = request.GET.get("state")
 
     if (not code) or (not state):
-        # handle error
-        pass
+        # TODO: log
+        return HttpResponse("Bad response from Spotify", status=502)
 
     logger.info("Auth code: %s", code)
     logger.info("State string: %s", state)
 
     query = RegistrationState.objects.filter(state_string=state)
-    length = query.count()
-    if length == 0:
-        # handle bad state string
-        pass
-    elif length > 1:
-        # handle duplicate state string
-        pass
+    if not query.exists():
+        # TODO: log
+        return HttpResponse("Bad response from Spotify", status=502)
 
     reg = query.get()
 
