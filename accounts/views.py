@@ -33,7 +33,10 @@ def handle_spotify_auth_response(request):
     state = request.GET.get("state")
 
     if (not code) or (not state):
-        # TODO log
+        logger.error("received bad forwarded request from Spotify")
+        logger.error("error: request missing user code or state string")
+        logger.error("path:", request.path)
+        logger.error("params:", request.GET)
         return HttpResponse("Bad response from Spotify", status=502)
 
     logger.info("Auth code: %s", code)
@@ -41,7 +44,10 @@ def handle_spotify_auth_response(request):
 
     query = RegistrationState.objects.filter(state_string=state)
     if not query.exists():
-        # TODO log
+        logger.error("received bad forwarded request from Spotify")
+        logger.error("error: state string did not match any string in the DB")
+        logger.error("path:", request.path)
+        logger.error("params:", request.GET)
         return HttpResponse("Bad response from Spotify", status=502)
 
     reg = query.get()
