@@ -1,7 +1,10 @@
 # Cybotify MVP
-<div align="left">
-  <a href="https://github.com/fpringle/cybotify_mvp/actions">
-    <img src="images/coverage.svg" height="20" alt="Test coverage">
+<div>
+  <a href="https://github.com/fpringle/cybotify_mvp/actions/workflows/tests.yml">
+    <img src="https://github.com/fpringle/cybotify_mvp/actions/workflows/tests.yml/badge.svg" height="20" alt="Tests" title="Tests">
+  </a>
+  <a href="https://github.com/fpringle/cybotify_mvp/actions/workflows/tests.yml">
+    <img src="images/coverage.svg" height="20" alt="Test coverage" title="Test coverage">
   </a>
 </div>
 
