@@ -2,8 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
 from django.shortcuts import render
+from django_pandas.io import read_frame
+from pandas.core.frame import DataFrame
 
-from music.models import UserPlaylist
+from music.models import TrackFeatures, UserPlaylist
 
 FLOAT_FIELDS = [
     "danceability",
@@ -32,45 +34,19 @@ ENUM_FIELDS = [
 ALL_FIELDS = FLOAT_FIELDS + INTEGER_FIELDS + ENUM_FIELDS
 
 
-def get_track_features(track, fields=None):
-    fields = fields or ALL_FIELDS[:]
-    if track.features_unavailable or not hasattr(track, "track_features"):
-        return {}
-    features = track.track_features
-    return {
-        field: getattr(features, field) for field in fields if hasattr(features, field)
-    }
-
-
-def get_playlist_all_features(playlist, fields=None):
-    tracks = playlist.track_set.all()
-    fields = fields or ALL_FIELDS[:]
-    features = []
-    for track in tracks:
-        data = get_track_features(track, fields)
-        data["id"] = track.pk
-        features.append(data)
-    return features
+def get_playlist_features_df(playlist) -> DataFrame:
+    qs = TrackFeatures.objects.filter(track__playlist=playlist)
+    return read_frame(qs).rename(columns={"track": "id"})
 
 
 def get_playlist_average_features(playlist, fields=None):
     fields = fields or ALL_FIELDS[:]
-    track_features = get_playlist_all_features(playlist, fields)
-
-    average_track_features = {
-        field: [features[field] for features in track_features if field in features]
-        for field in fields
-    }
-
-    average_track_features = {
-        field: sum(values) / len(values)
-        for field, values in average_track_features.items()
-        if values
-    }
-
+    df = get_playlist_features_df(playlist)
+    feature_means = df[fields].mean(axis=0).to_dict()
+    track_features = df.to_dict("records")
     return {
         "name": playlist.name,
-        "features": average_track_features,
+        "features": feature_means,
         "track_features": track_features,
     }
 
