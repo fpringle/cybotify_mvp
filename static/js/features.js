@@ -15,8 +15,10 @@ const plotSpider = (...plotData) => {
     'valence',
   ];
   const theta = fields.map(f => f[0].toUpperCase() + f.substr(1).toLowerCase());
+  theta.push(theta[0]);
   const data = plotData.map(pd => {
     const r = fields.map(f => pd[f]);
+    r.push(r[0]);
     return {
       type: 'scatterpolar',
       hovertemplate: '<i>%{theta}</i>: %{r:.3f}',
