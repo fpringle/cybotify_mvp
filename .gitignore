@@ -4,3 +4,5 @@ TODO
 db.sqlite3
 *.pyc
 __pycache__
+htmlcov
+.coverage
