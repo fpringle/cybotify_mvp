@@ -30,6 +30,9 @@ jobs:
         python3.8 -m pip install --upgrade pip
         python3.8 -m pip install -r requirements.txt
         python3.8 -m pip install -r requirements_dev.txt
+        python3.8 -m pip list
+        python3.8 -m pip install requests
+        python3.8 -m pip list
     
     - name: Run Tests
       run: |
