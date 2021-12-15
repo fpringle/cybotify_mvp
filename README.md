@@ -1,7 +1,7 @@
 # Cybotify MVP
 <div align="center">
   <a href="https://github.com/fpringle/cybotify_mvp/actions">
-    <img src="images/coverage.png" height="20" alt="Test coverage">
+    <img src="images/coverage.svg" height="20" alt="Test coverage">
   </a>
 </div>
 
