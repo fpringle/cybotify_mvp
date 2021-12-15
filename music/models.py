@@ -7,26 +7,22 @@ from accounts import SpotifyManager
 class UserPlaylistManager(models.Manager):
     def create_or_update(self, playlist_data, user=None):
         spotify_id = playlist_data["id"]
+        name = playlist_data["name"]
         status = SpotifyManager.get_playlist_status(playlist_data)
         owner = playlist_data["owner"]["id"]
-        if self.filter(spotify_id=spotify_id).exists():
-            print("update")
-            pl = self.get(spotify_id=spotify_id)
-            if status != pl.status or owner != pl.owner:
-                pl.status = status
-                pl.owner = owner
-                pl.save()
-            if user is not None and not pl.users.filter(user_id=user.id).exists():
-                pl.users.add(user)
-        else:
-            pl = self.create(
-                spotify_id=spotify_id,
-                name=playlist_data["name"],
-                status=status,
-                owner=owner,
-            )
-            if user is not None:
-                pl.users.add(user)
+
+        playlist, created = self.update_or_create(
+            spotify_id=spotify_id,
+            defaults={
+                "name": name,
+                "status": status,
+                "owner": owner,
+            },
+        )
+
+        if user is not None:
+            if created or not playlist.users.filter(user_id=user.id).exists():
+                playlist.users.add(user)
 
 
 class UserPlaylist(models.Model):
