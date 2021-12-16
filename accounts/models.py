@@ -53,8 +53,8 @@ class SpotifyUser(models.Model):
     def update_playlists(self):
         self.user.credentials.check_expired()
         playlists = SpotifyManager.get_playlists(self.user.credentials.access_token)
-        for playlist in playlists:
-            UserPlaylist.objects.create_or_update(playlist, self)
+        for position, playlist in enumerate(playlists, 1):
+            UserPlaylist.objects.create_or_update(playlist, self, position)
 
         playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
         to_remove = self.userplaylist_set.filter(~models.Q(spotify_id__in=playlist_ids))
