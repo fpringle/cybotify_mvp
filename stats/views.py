@@ -43,10 +43,12 @@ def get_playlist_average_features(playlist, fields=None):
     fields = fields or ALL_FIELDS[:]
     df = get_playlist_features_df(playlist)
     feature_means = df[fields].mean(axis=0).to_dict()
+    feature_stdevs = df[fields].std(axis=0).to_dict()
     track_features = df.to_dict("records")
     return {
         "name": playlist.name,
         "features": feature_means,
+        "feature_stdevs": feature_stdevs,
         "track_features": track_features,
     }
 
