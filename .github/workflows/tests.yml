@@ -43,7 +43,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        python3.8 -m coverage run --source='.' --omit="tests/*" manage.py test
+        python3.8 -m coverage run --source='.' --omit="tests/*","*/migrations/*" manage.py test
 
     - name: Coverage Badge
       uses: tj-actions/coverage-badge-py@v1.6
