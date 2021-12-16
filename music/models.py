@@ -4,6 +4,27 @@ from django.utils.translation import gettext_lazy as _
 from accounts import SpotifyManager
 
 
+class UserPlaylistManager(models.Manager):
+    def create_or_update(self, playlist_data, user=None):
+        spotify_id = playlist_data["id"]
+        name = playlist_data["name"]
+        status = SpotifyManager.get_playlist_status(playlist_data)
+        owner = playlist_data["owner"]["id"]
+
+        playlist, created = self.update_or_create(
+            spotify_id=spotify_id,
+            defaults={
+                "name": name,
+                "status": status,
+                "owner": owner,
+            },
+        )
+
+        if user is not None:
+            if created or not playlist.users.filter(user_id=user.id).exists():
+                playlist.users.add(user)
+
+
 class UserPlaylist(models.Model):
     # make spotify_id unique
     spotify_id = models.CharField(max_length=256, unique=True)
@@ -12,6 +33,7 @@ class UserPlaylist(models.Model):
     users = models.ManyToManyField("accounts.SpotifyUser")
     owner = models.CharField(max_length=256)
     last_updated = models.DateTimeField(auto_now=True)
+    objects = UserPlaylistManager()
 
     class Status(models.TextChoices):
         PRIVATE = "PR", _("Private")
@@ -22,29 +44,6 @@ class UserPlaylist(models.Model):
         max_length=2,
         choices=Status.choices,
     )
-
-    @classmethod
-    def create_or_update(cls, playlist_data, user=None):
-        spotify_id = playlist_data["id"]
-        status = SpotifyManager.get_playlist_status(playlist_data)
-        owner = playlist_data["owner"]["id"]
-        try:
-            pl = UserPlaylist.objects.get(spotify_id=spotify_id)
-            if status != pl.status or owner != pl.owner:
-                pl.status = status
-                pl.owner = owner
-                pl.save()
-            if user is not None and not pl.users.filter(user_id=user.id).exists():
-                pl.users.add(user)
-        except UserPlaylist.DoesNotExist:
-            pl = cls.objects.create(
-                spotify_id=spotify_id,
-                name=playlist_data["name"],
-                status=status,
-                owner=owner,
-            )
-            if user is not None:
-                pl.users.add(user)
 
     def is_user_allowed(self, user):
         if self.status == "PU":
