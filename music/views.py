@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from accounts.views import needs_spotify_user
+from music.models import SpotifyUserPlaylistRelationship
 
 
 @login_required
@@ -10,7 +11,12 @@ from accounts.views import needs_spotify_user
 def playlists(request):
     su = request.user.spotifyuser
     su.update_playlists()
-    playlists = su.userplaylist_set.all().order_by("name")
+    playlists = [
+        x.playlist
+        for x in SpotifyUserPlaylistRelationship.objects.filter(user=su).order_by(
+            "playlist_position"
+        )
+    ]
     playlist_data = [
         {
             #            "id": pl.pk,
