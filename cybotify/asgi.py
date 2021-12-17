@@ -13,7 +13,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-import stats.routing
+import api.stats.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cybotify.settings")
 
@@ -21,7 +21,7 @@ application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
         "websocket": AuthMiddlewareStack(
-            URLRouter(stats.routing.websocket_urlpatterns)
+            URLRouter(api.stats.routing.websocket_urlpatterns)
         ),
     }
 )

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-from music.models import UserPlaylist
+from api.music.models import UserPlaylist
 
 from . import SpotifyManager
 from .util import random_string

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from stats.views import playlist_detail
+from api.stats.views import playlist_detail
 
 from . import views
 

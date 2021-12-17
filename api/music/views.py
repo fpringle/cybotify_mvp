@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
-from accounts.views import needs_spotify_user
+from api.accounts.views import needs_spotify_user
 
 
 @login_required

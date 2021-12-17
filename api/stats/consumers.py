@@ -1,6 +1,6 @@
 from channels.generic.websocket import JsonWebsocketConsumer
 
-from stats.views import get_playlist_average_features
+from .views import get_playlist_average_features
 
 
 class PlaylistDetailConsumer(JsonWebsocketConsumer):

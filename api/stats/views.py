@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django_pandas.io import read_frame
 from pandas.core.frame import DataFrame
 
-from music.models import TrackFeatures, UserPlaylist
+from api.music.models import TrackFeatures, UserPlaylist
 
 FLOAT_FIELDS = [
     "danceability",

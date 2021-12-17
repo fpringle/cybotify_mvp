@@ -9,8 +9,6 @@ def index(request):
 
 urlpatterns = [
     path("", index, name="index"),
-    path("accounts/", include("accounts.urls")),
-    path("music/", include("music.urls")),
-    path("stats/", include("stats.urls")),
+    path("api/", include("api.urls")),
     path("admin/", admin.site.urls),
 ]

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from accounts import SpotifyManager
+from api.accounts import SpotifyManager
 
 
 class UserPlaylistManager(models.Manager):
