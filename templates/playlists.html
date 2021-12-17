@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block css %}
-{% load static %}
 <link rel="stylesheet" href={% static 'css/playlists.css' %}>
 {% endblock css %}
 
 {% block scripts %}
-{{ playlist_data|json_script:"playlists" }}
-{% load static %}
 <script src="{% static 'js/playlists.js' %}" type="application/javascript"></script>
+<script>
+  const requestUrl = "{{ url }}";
+  let detailUrl = "{{ detail_url }}";
+  detailUrl = detailUrl.slice(0, detailUrl.length - 1);
+</script>
 {% endblock scripts %}
 
 {% block content %}

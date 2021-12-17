@@ -6,7 +6,7 @@ const playlistListElem = (data) => {
   const updated = $('<span/>').addClass('playlistLastUpdated');
   updated.text(`last updated ${data.last_updated}`);
   const div = $('<div/>').addClass("playlist").append(name).append(updated)
-  const a = $('<a/>').attr('href', data.url).append(div);
+  const a = $('<a/>').attr('href', detailUrl + data.id).append(div);
   return $('<li/>').append(a);
 };
 
@@ -26,15 +26,24 @@ let currentFilter = "ALL";
 
 
 $(document).ready(() => {
-  const playlists = JSON.parse($('#playlists').text());
+  let playlists;
+  fetch(requestUrl, {
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(response => {
+    return response.json();
+  }).then(response => {
+    playlists = response;
+    console.log(playlists);
+    filterByStatus(playlists, $('#filter').val());
 
-  filterByStatus(playlists, $('#filter').val());
-
-  $('#filter').change(function() {
-    const newFilter = $(this).val();
-    if (newFilter === currentFilter) return;
-    currentFilter = newFilter;
-    filterByStatus(playlists, newFilter);
+    $('#filter').change(function() {
+      const newFilter = $(this).val();
+      if (newFilter === currentFilter) return;
+      currentFilter = newFilter;
+      filterByStatus(playlists, newFilter);
+    });
   });
 
 });
