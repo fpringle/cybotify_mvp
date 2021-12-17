@@ -3,4 +3,5 @@ django
 django-environ
 django-extensions
 django-pandas
+djangorestframework
 psycopg2

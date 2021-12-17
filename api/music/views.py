@@ -1,26 +1,81 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.urls import reverse
+from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
 
-from api.accounts.views import needs_spotify_user
+from .models import Track, UserPlaylist
+from .permissions import HasPlaylistAccess, HasSpotifyUser
+from .serializers import (
+    PlaylistDetailSerializer,
+    PlaylistFeaturesSerializer,
+    PlaylistSerializer,
+    TrackSerializer,
+    TrackWithFeaturesSerializer,
+)
 
 
-@login_required
-@needs_spotify_user
-def playlists(request):
-    su = request.user.spotifyuser
-    su.update_playlists()
-    playlists = su.userplaylist_set.all().order_by("name")
-    playlist_data = [
-        {
-            #            "id": pl.pk,
-            #            "spotify_id": pl.spotify_id,
-            "name": pl.name,
-            "last_updated": pl.last_updated,
-            "status": pl.status,
-            "url": reverse("playlist-detail", args=(pl.pk,)),
-        }
-        for pl in playlists
+class PlaylistViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserPlaylist.objects.all()
+    serializer_class = PlaylistSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasSpotifyUser,
+        HasPlaylistAccess,
     ]
-    context = {"playlists": playlists, "playlist_data": playlist_data}
-    return render(request, "playlists.html", context)
+
+    def list(self, request, format=None):
+        su = request.user.spotifyuser
+        su.update_playlists()
+        playlists = su.userplaylist_set.all().order_by("name")
+        serializer = PlaylistSerializer(playlists, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk, format=None):
+        try:
+            playlist = UserPlaylist.objects.get(pk=pk)
+        except UserPlaylist.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        playlist.update_tracks(False)
+        serializer = PlaylistDetailSerializer(playlist)
+        return Response(serializer.data)
+
+
+class PlaylistFeaturesViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserPlaylist.objects.all()
+    serializer_class = PlaylistFeaturesSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasSpotifyUser,
+        HasPlaylistAccess,
+    ]
+
+    def retrieve(self, request, pk, format=None):
+        try:
+            playlist = UserPlaylist.objects.get(pk=pk)
+        except UserPlaylist.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        playlist.update_tracks(True)
+        serializer = PlaylistFeaturesSerializer(playlist)
+        return Response(serializer.data)
+
+
+class TrackViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Track.objects.all()
+    serializer_class = TrackSerializer
+    permission_classes = [permissions.IsAuthenticated, HasSpotifyUser]
+
+
+class TrackFeaturesViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Track.objects.all()
+    serializer_class = TrackWithFeaturesSerializer
+    permission_classes = [permissions.IsAuthenticated, HasSpotifyUser]
+
+    def retrieve(self, request, pk, format=None):
+        try:
+            track = Track.objects.get(pk=pk)
+        except Track.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        track.get_features()
+        serializer = TrackWithFeaturesSerializer(track)
+        return Response(serializer.data)
