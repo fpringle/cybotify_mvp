@@ -16,13 +16,20 @@
 
 <div style="font-size: 18px">Click one of your playlists to see a basic analysis</div>
 
-<div>
-  <label for="filter">Filter by playlist type:</label>
+<div style="display: flex">
+  <label for="filter" style="width:200px">Filter by playlist type:</label>
   <select name="filter" id="filter" style="font-size: 18px">
     <option value="ALL" selected>All</option>
     <option value="PR">Private</option>
     <option value="PU">Public</option>
     <option value="CO">Collaborative</option>
+  </select>
+</div>
+<div style="display: flex">
+  <label for="sort" style="width:200px">Sort by:</label>
+  <select name="sort" id="sort" style="font-size: 18px">
+    <option value="Default" selected>Default</option>
+    <option value="Alphabetical">Alphabetical</option>
   </select>
 </div>
 
