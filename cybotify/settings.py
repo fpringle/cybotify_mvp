@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "api.accounts.apps.AccountsConfig",
     "api.music.apps.MusicConfig",
     "api.stats.apps.StatsConfig",
+    "frontend.apps.FrontEndConfig",
     # builtin
     "django.contrib.admin",
     "django.contrib.auth",
