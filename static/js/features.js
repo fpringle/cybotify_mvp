@@ -40,24 +40,65 @@ const plotSpider = (...plotData) => {
       size: 20,
     },
   };
+  $('#spiderPlot').empty();
   Plotly.newPlot('spiderPlot', data, layout);
 };
 
+const setName = (name) => {
+  $('#playlistName').empty();
+  $('#playlistName').append($('<span/>').text(name));
+};
+
+let playlist_features;
+let track_features;
+
+const fillList = (trackData) => {
+  $('#trackContainer').empty();
+  trackData.forEach(track => {
+    const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${track.artists}`);
+    p.attr('id', 'track' + track.id);
+    $('#trackContainer').append(p);
+  });
+};
+
 $(document).ready(() => {
-  const features = JSON.parse($('#features').text());
-  const values = features.features;
-  plotSpider(values);
-  const track_features = features.track_features;
-  track_features.forEach(track => {
-    const id = track.id;
-    const elem = $('#track' + id);
-    const hoverOn = (e) => {
-      plotSpider(values, track);
-    };
-    const hoverOff = (e) => {
-      plotSpider(values);
-    };
-    elem.hover(hoverOn, hoverOff);
+  const getPlaylistFeatures = fetch(playlistUrl, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).then(response => {
+    return response.json();
+  }).then(playlist => {
+    setName(playlist.name);
+    fillList(playlist.tracks);
+  });
+
+  const getTrackInfo = fetch(analysisUrl, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).then(response => {
+    return response.text();
+  }).then(text => {
+    return JSON.parse(text);
+  }).then(features => {
+    playlist_features = features.features;
+    plotSpider(playlist_features);
+    track_features = features.track_features;
+  });
+
+  Promise.all([getPlaylistFeatures, getTrackInfo]).then(() => {
+    track_features.forEach(track => {
+      const id = track.id;
+      const elem = $('#track' + id);
+      const hoverOn = (e) => {
+        plotSpider(playlist_features, track);
+      };
+      const hoverOff = (e) => {
+        plotSpider(playlist_features);
+      };
+      elem.hover(hoverOn, hoverOff);
+    });
   });
 });
 

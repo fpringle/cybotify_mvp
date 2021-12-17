@@ -7,7 +7,6 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from api.music.models import UserPlaylist
-from api.stats.views import get_playlist_average_features
 
 
 def index(request):
@@ -45,21 +44,11 @@ def playlist_detail(request, playlist_id):
     if not playlist.is_user_allowed(request.user):
         raise PermissionDenied("You don't have permission to view that playlist.")
 
-    if playlist.needs_update()[0]:
-        print("playlist is out of date, updating")
-        context = {
-            "ws_url": f"/ws/playlist_detail/{playlist_id}/",
-        }
-
-        return render(request, "playlist_detail_ws.html", context)
-
-    else:
-        print("no need to update")
-        context = {
-            "playlist": playlist,
-            "features": get_playlist_average_features(playlist),
-        }
-        return render(request, "playlist_detail.html", context)
+    context = {
+        "playlist_url": reverse("playlist-detail", args=(playlist_id,)),
+        "analysis_url": reverse("playlist-analysis", args=(playlist_id,)),
+    }
+    return render(request, "playlist_detail.html", context)
 
 
 # accounts
