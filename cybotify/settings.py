@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # 3rd party
     "django_extensions",
     "channels",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
