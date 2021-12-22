@@ -5,7 +5,7 @@ from accounts import SpotifyManager
 
 
 class UserPlaylistManager(models.Manager):
-    def create_or_update(self, playlist_data, user=None):
+    def create_or_update(self, playlist_data, user, position):
         spotify_id = playlist_data["id"]
         name = playlist_data["name"]
         status = SpotifyManager.get_playlist_status(playlist_data)
@@ -20,9 +20,9 @@ class UserPlaylistManager(models.Manager):
             },
         )
 
-        if user is not None:
-            if created or not playlist.users.filter(user_id=user.id).exists():
-                playlist.users.add(user)
+        SpotifyUserPlaylistRelationship.objects.update_or_create(
+            user=user, playlist=playlist, defaults={"playlist_position": position}
+        )
 
 
 class UserPlaylist(models.Model):
@@ -30,7 +30,9 @@ class UserPlaylist(models.Model):
     spotify_id = models.CharField(max_length=256, unique=True)
     snapshot_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
-    users = models.ManyToManyField("accounts.SpotifyUser")
+    users = models.ManyToManyField(
+        "accounts.SpotifyUser", through="SpotifyUserPlaylistRelationship"
+    )
     owner = models.CharField(max_length=256)
     last_updated = models.DateTimeField(auto_now=True)
     objects = UserPlaylistManager()
@@ -78,7 +80,7 @@ class UserPlaylist(models.Model):
     def update_tracks(self, get_features=True):
         sp = self.get_client()
         tracks = SpotifyManager.get_playlist_tracks(sp, self.spotify_id)
-        for track_data in tracks:
+        for position, track_data in enumerate(tracks, 0):
             artists = " =|AND|= ".join(
                 artist["name"] for artist in track_data["artists"]
             )
@@ -90,11 +92,10 @@ class UserPlaylist(models.Model):
                     "album": track_data["album"]["name"],
                 },
             )
-            if created or not self.track_set.filter(pk=track.pk).exists():
-                self.track_set.add(track)
 
-            track.save()
-            self.track_set.add(track)
+            PlaylistTrackRelationship.objects.update_or_create(
+                playlist=self, track=track, defaults={"track_position": position}
+            )
 
         self.save()
 
@@ -152,12 +153,21 @@ class UserPlaylist(models.Model):
         )
 
 
+class SpotifyUserPlaylistRelationship(models.Model):
+    user = models.ForeignKey("accounts.SpotifyUser", on_delete=models.CASCADE)
+    playlist = models.ForeignKey(UserPlaylist, on_delete=models.CASCADE)
+    playlist_position = models.IntegerField()
+
+    class Meta:
+        unique_together = ("user", "playlist")
+
+
 class Track(models.Model):
     spotify_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
     artists = models.CharField(max_length=256)
     album = models.CharField(max_length=256)
-    playlist = models.ManyToManyField(UserPlaylist)
+    playlist = models.ManyToManyField(UserPlaylist, through="PlaylistTrackRelationship")
     features_unavailable = models.BooleanField(default=False)
 
     @property
@@ -199,6 +209,15 @@ class Track(models.Model):
         return (
             f"(name={self.name}, artists={self.artists}, spotifyID={self.spotify_id})"
         )
+
+
+class PlaylistTrackRelationship(models.Model):
+    playlist = models.ForeignKey(UserPlaylist, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE)
+    track_position = models.IntegerField()
+
+    class Meta:
+        unique_together = ("playlist", "track")
 
 
 class TrackFeatures(models.Model):
