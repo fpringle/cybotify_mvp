@@ -80,7 +80,7 @@ class UserPlaylist(models.Model):
     def update_tracks(self, get_features=True):
         sp = self.get_client()
         tracks = SpotifyManager.get_playlist_tracks(sp, self.spotify_id)
-        for position, track_data in enumerate(tracks, 1):
+        for position, track_data in enumerate(tracks, 0):
             artists = " =|AND|= ".join(
                 artist["name"] for artist in track_data["artists"]
             )
