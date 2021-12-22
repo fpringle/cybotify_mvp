@@ -16,14 +16,23 @@ const fillList = (data) => {
   data.forEach(d => list.append(playlistListElem(d)));
 };
 
+const sortBy = (data, type) => {
+  if (type == 'Default') return data;
+  else if (type == 'Alphabetical') {
+    const sortedData = data.slice();
+    return sortedData.sort((a, b) => a.name < b.name ? -1 : 1);
+  } else {
+    throw new Error('unknown sort type: ' + type);
+  }
+};
+
 const filterByStatus = (data, status) => {
-  console.log("filter by status = " + status);
   if (status !== "ALL") data = data.filter(d => d.status == status);
   fillList(data);
 };
 
 let currentFilter = "ALL";
-
+let currentSort = "Default";
 
 $(document).ready(() => {
   let playlists;
@@ -46,5 +55,11 @@ $(document).ready(() => {
     });
   });
 
+  $('#sort').change(function() {
+    const newSort = $(this).val();
+    if (newSort === currentSort) return;
+    currentSort = newSort;
+    filterByStatus(sortBy(playlists, newSort), currentFilter);
+  });
 });
 })();
