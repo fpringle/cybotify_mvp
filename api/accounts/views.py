@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.hashers import is_password_usable, make_password
 from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -129,14 +130,14 @@ def handle_spotify_auth_response(request):
 
     login(request, user)
     if not (hasattr(user, "password") and is_password_usable(user.password)):
-        return HttpResponseRedirect("/accounts/new/create_password/")
-    return HttpResponseRedirect("/")
+        return HttpResponseRedirect(reverse("frontend:create-password"))
+    return HttpResponseRedirect(reverse("frontend:index"))
 
 
 @api_view(["GET"])
 def logout(request):
     auth_logout(request)
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect(reverse("frontend:index"))
 
 
 @api_view(["POST"])
@@ -152,4 +153,4 @@ def create_password(request):
     user.password = make_password(password)
     user.save()
     login(request, user)
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect(reverse("frontend:index"))

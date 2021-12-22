@@ -59,7 +59,7 @@ def profile(request):
 
 def register(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect("/")
+        return HttpResponseRedirect(reverse("frontend:index"))
     return render(request, "register.html")
 
 
