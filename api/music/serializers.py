@@ -8,6 +8,12 @@ class TrackSerializer(serializers.ModelSerializer):
         model = Track
         fields = ["id", "spotify_id", "name", "artists", "album"]
 
+    artists = serializers.ListField(
+        child=serializers.CharField(),
+        allow_empty=True,
+        source="artist_list",
+    )
+
 
 class TrackFeaturesSerializer(serializers.ModelSerializer):
     class Meta:

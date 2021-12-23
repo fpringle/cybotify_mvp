@@ -55,7 +55,8 @@ let track_features;
 const fillList = (trackData) => {
   $('#trackContainer').empty();
   trackData.forEach(track => {
-    const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${track.artists}`);
+    const artists = track.artists.join(', ');
+    const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${artists}`);
     p.attr('id', 'track' + track.id);
     $('#trackContainer').append(p);
   });
