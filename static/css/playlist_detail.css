@@ -73,3 +73,20 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+#searchBox {
+  display: flex;
+  justify-content: center;
+}
+
+#searchBoxInput {
+  background-color: #383838;
+  color: white;
+  caret-color: transparent;
+  border-width: 0px;
+}
+
+#searchBoxInput:focus {
+  border-width: 0px;
+  outline: none;
+}

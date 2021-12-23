@@ -51,15 +51,44 @@ const setName = (name) => {
 
 let playlist_features;
 let track_features;
+let track_elements;
+let track_data;
 
-const fillList = (trackData) => {
-  $('#trackContainer').empty();
+const makeElements = (trackData) => {
+  track_elements = [];
   trackData.forEach(track => {
     const artists = track.artists.join(', ');
     const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${artists}`);
     p.attr('id', 'track' + track.id);
-    $('#trackContainer').append(p);
+    track_elements.push(p);
   });
+};
+
+const fillList = (indices) => {
+  $('#trackContainer').empty();
+  if (!indices) {
+    track_elements.forEach(elem => {
+      $('#trackContainer').append(elem);
+    });
+  } else {
+    indices.forEach(idx => {
+      $('#trackContainer').append(track_elements[idx]);
+    });
+  }
+};
+
+const search = (data, text) => {
+  text = text.toLowerCase();
+  const name = data.name.toLowerCase();
+  const artists = data.artists.toLowerCase();
+  const isIn = (word, sentence) => sentence.indexOf(word) !== -1;
+  return isIn(text, name) || isIn(text, artists);
+};
+
+const filter = (text) => {
+  const withIdx = track_data.map((e, i) => [e, i]);
+  const filtered = text ? withIdx.filter(([td, idx]) => search(td, text)) : withIdx;
+  return filtered.map(([td, idx]) => idx);
 };
 
 $(document).ready(() => {
@@ -71,7 +100,9 @@ $(document).ready(() => {
     return response.json();
   }).then(playlist => {
     setName(playlist.name);
-    fillList(playlist.tracks);
+    makeElements(playlist.tracks);
+    track_data = playlist.tracks;
+    fillList();
   });
 
   const getTrackInfo = fetch(analysisUrl, {
@@ -101,6 +132,15 @@ $(document).ready(() => {
       elem.hover(hoverOn, hoverOff);
     });
   });
+
+  const searchBox = $('#searchBoxInput');
+  document.getElementById('searchBoxInput').addEventListener('input', event => {
+    const curVal = searchBox.val();
+    console.log("current value:", curVal);
+    fillList(filter(curVal));
+  });
+
+  searchBox.focus();
 });
 
 })();
