@@ -86,6 +86,10 @@ body {
   border-width: 0px;
 }
 
+#searchBoxInput::selection {
+  background-color: black;
+}
+
 #searchBoxInput:focus {
   border-width: 0px;
   outline: none;

@@ -53,6 +53,7 @@ let playlist_features;
 let track_features;
 let track_elements;
 let track_data;
+let fuse;
 
 const makeElements = (trackData) => {
   track_elements = [];
@@ -102,6 +103,7 @@ const search = (data, text) => {
 };
 
 const filter = (text) => {
+  return fuse.search(text).map(result => result.refIndex);
   const withIdx = track_data.map((e, i) => [e, i]);
   const filtered = text ? withIdx.filter(([td, idx]) => search(td, text)) : withIdx;
   return filtered.map(([td, idx]) => idx);
@@ -124,6 +126,14 @@ $(document).ready(() => {
     setName(playlist.name);
     makeElements(playlist.tracks);
     track_data = playlist.tracks;
+    fuse = new Fuse(track_data, {
+      threshold: 0.4,
+      keys: [
+        'name',
+        'artists',
+//        'album',
+      ],
+    });
     fillList();
   });
 
