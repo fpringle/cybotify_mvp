@@ -5,14 +5,14 @@ from unittest import skipIf
 import tqdm
 from django.test import TestCase
 
-from music.models import Track, TrackFeatures, UserPlaylist  # noqa
+from api.music.models import Track, TrackFeatures, UserPlaylist  # noqa
 
 from .test_data import playlist_lengths
 from .views import ALL_FIELDS
 
-number_runs = 5000
-number_playlists = 1000
-number_tracks = 100000
+number_runs = 1000
+number_playlists = 250
+number_tracks = 25000
 
 skip_long_tests = True
 
@@ -56,7 +56,7 @@ class FeaturesLookupSpeedTestCase(TestCase):
             playlist = UserPlaylist.objects.create(pk=i, spotify_id=str(i))
             tracks_in_playlist = random.choice(playlist_lengths)
             tracks = random.sample(range(number_tracks), tracks_in_playlist)
-            playlist.track_set.set(tracks)
+            playlist.track_set.set(tracks, through_defaults={"track_position": 0})
 
         print("# of playlists:", UserPlaylist.objects.count())
         print("# of tracks:", Track.objects.count())
@@ -80,9 +80,9 @@ class FeaturesLookupSpeedTestCase(TestCase):
     def _method_3(cls, playlist):
         q = (
             "SELECT music_trackfeatures.* "
-            "FROM music_track_playlist "
-            "INNER JOIN music_track ON (music_track_playlist.track_id = music_track.id)"
-            f" AND music_track_playlist.userplaylist_id = {playlist.id} "
+            "FROM music_playlisttrackrelationship INNER JOIN music_track ON "
+            "(music_playlisttrackrelationship.track_id = music_track.id)"
+            f" AND music_playlisttrackrelationship.playlist_id = {playlist.id} "
             "INNER JOIN music_trackfeatures ON "
             "(music_track.id = music_trackfeatures.track_id) "
         )

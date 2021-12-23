@@ -128,7 +128,7 @@ class UserCredentialsTestCase(TestCase):
         self.assertTrue(self.user.credentials.has_expired)
 
     @mock.patch(
-        "accounts.SpotifyManager.refresh_tokens", side_effect=fake_refresh_token
+        "api.accounts.SpotifyManager.refresh_tokens", side_effect=fake_refresh_token
     )
     def test_refresh(self, mock_refresh):
         self.user.credentials.refresh()
