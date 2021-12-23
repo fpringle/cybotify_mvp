@@ -1,20 +1,40 @@
 import datetime
 import logging
-from functools import wraps
 
 from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import is_password_usable, make_password
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.urls import reverse
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from . import SpotifyManager
 from .models import RegistrationState, SpotifyUser, SpotifyUserCredentials, User
+from .serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 
 
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, pk=None, format=None):
+        if pk is None:
+            user = request.user
+        else:
+            if not (pk == request.user.pk or request.user.is_superuser):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            user = User.objects.get(pk=pk)
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+@api_view(["GET"])
 def new_user(request):
     logger.info("Request for new user")
     reg = RegistrationState.objects.create_state()
@@ -27,6 +47,7 @@ def new_user(request):
     return HttpResponseRedirect(url)
 
 
+@api_view(["GET"])
 def handle_spotify_auth_response(request):
     logger.info("Response from spotify auth")
     code = request.GET.get("code")
@@ -109,18 +130,18 @@ def handle_spotify_auth_response(request):
 
     login(request, user)
     if not (hasattr(user, "password") and is_password_usable(user.password)):
-        return HttpResponseRedirect("/accounts/new/create_password/")
-    return HttpResponseRedirect("/")
+        return HttpResponseRedirect(reverse("frontend:create-password"))
+    return HttpResponseRedirect(reverse("frontend:index"))
 
 
+@api_view(["GET"])
 def logout(request):
     auth_logout(request)
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect(reverse("frontend:index"))
 
 
+@api_view(["POST"])
 def create_password(request):
-    if request.method == "GET":
-        return render(request, "create_password.html")
     print("post create pass")
     user_id = request.user.pk
     user = User.objects.filter(pk=user_id).get()
@@ -132,37 +153,4 @@ def create_password(request):
     user.password = make_password(password)
     user.save()
     login(request, user)
-    return HttpResponseRedirect("/")
-
-
-def needs_spotify_user(func):
-    @wraps(func)
-    def wrapper(request, *args, **kwargs):
-        if not hasattr(request.user, "spotifyuser"):
-            return render(request, "register.html")
-        return func(request, *args, **kwargs)
-
-    return wrapper
-
-
-@login_required
-@needs_spotify_user
-def playlists(request):
-    su = request.user.spotifyuser
-    su.update_playlists()
-    playlists = su.userplaylist_set.all().order_by("name")
-    context = {
-        "playlists": playlists,
-    }
-    return render(request, "playlists.html", context)
-
-
-@login_required
-def profile(request):
-    return render(request, "profile.html")
-
-
-def register(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect("/")
-    return render(request, "register.html")
+    return HttpResponseRedirect(reverse("frontend:index"))

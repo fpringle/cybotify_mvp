@@ -9,7 +9,5 @@ urlpatterns = [
     path("login/", auth_views.LoginView.as_view(template_name="login.html")),
     path("logout/", views.logout, name="logout"),
     path("new/create_password/", views.create_password, name="create-password"),
-    path("register/", views.register, name="register"),
-    path("profile/", views.profile, name="profile"),
     path("", include("django.contrib.auth.urls")),
 ]

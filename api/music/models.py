@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from accounts import SpotifyManager
+from api.accounts import SpotifyManager
 
 
 class UserPlaylistManager(models.Manager):
@@ -80,7 +80,7 @@ class UserPlaylist(models.Model):
     def update_tracks(self, get_features=True):
         sp = self.get_client()
         tracks = SpotifyManager.get_playlist_tracks(sp, self.spotify_id)
-        for position, track_data in enumerate(tracks, 1):
+        for position, track_data in enumerate(tracks, 0):
             artists = " =|AND|= ".join(
                 artist["name"] for artist in track_data["artists"]
             )

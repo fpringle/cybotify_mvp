@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-from music.models import UserPlaylist
+from api.music.models import UserPlaylist
 
 from . import SpotifyManager
 from .util import random_string
@@ -53,7 +53,7 @@ class SpotifyUser(models.Model):
     def update_playlists(self):
         self.user.credentials.check_expired()
         playlists = SpotifyManager.get_playlists(self.user.credentials.access_token)
-        for position, playlist in enumerate(playlists, 1):
+        for position, playlist in enumerate(playlists, 0):
             UserPlaylist.objects.create_or_update(playlist, self, position)
 
         playlist_ids = [pl["id"] for pl in playlists if "id" in pl]
