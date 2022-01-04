@@ -1,0 +1,135 @@
+#!/bin/python
+
+import re
+import sys
+import urllib.parse
+from subprocess import PIPE, Popen
+
+main_branch = "main"
+remote, url = sys.argv[1:]
+repo = re.sub(r"^[^:]*:([^.]*).*$", r"\1", url)
+
+z40 = "0000000000000000000000000000000000000000"
+
+# colours
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[36m"
+BOLD = "\033[1m"
+ITALICS = "\033[3m"
+UNDERLINE = "\033[4m"
+ENDCOLOUR = "\033[0m"
+
+
+def tty_input(prompt):
+    print(prompt, end="", flush=True)
+    with open("/dev/tty") as stdin:
+        inp = stdin.readline().rstrip()
+
+    return inp
+
+
+def check_push_to_main():
+    def get_input(first):
+        if first:
+            return tty_input(
+                f"{RED}WARNING: you're pushing to the main branch of remote ${remote}. "
+                f"Are you sure? (y/n) {ENDCOLOUR}"
+            )
+        else:
+            return tty_input(
+                f"Sorry, you answer must be either y or n. {RED}"
+                f"Are you sure? (y/n) {ENDCOLOUR}"
+            )
+
+    def check_input(inp):
+        return inp.lower() in "yn"
+
+    inp = get_input(True)
+    while not check_input(inp):
+        inp = get_input(False)
+
+    if inp.lower() != "y":
+        print("Cancelling push.")
+        sys.exit(1)
+
+
+templates = [
+    {
+        "name": "bugfix",
+        "template": "bugfix.md",
+        "labels": ["bugfix"],
+        "title_prefix": "[BUGFIX]",
+    },
+    {
+        "name": "feature",
+        "template": "feature.md",
+        "labels": ["enhancement"],
+        "title_prefix": "[FEATURE]",
+    },
+]
+
+
+def print_pr_links(is_new_branch, local_ref, remote_ref):
+    local_branch_name = local_ref.split("/", maxsplit=2)[2]
+    remote_branch_name = remote_ref.split("/", maxsplit=2)[2]
+    proc = Popen(["git", "log", "-1", "--format=%s", local_branch_name], stdout=PIPE)
+    last_commit_msg = proc.stdout.readline().decode()
+    print()
+    if is_new_branch:
+        print(
+            f"{GREEN}You're creating a new remote branch {BOLD}{remote_branch_name}"
+            f"{ENDCOLOUR}{GREEN} in the repo {BOLD}{repo}.{ENDCOLOUR}{GREEN}"
+        )
+    else:
+        print(
+            f"{BLUE}You're pushing an update to branch {BOLD}{remote_branch_name}"
+            f"{ENDCOLOUR}{BLUE} in the repo {BOLD}{repo}.{ENDCOLOUR}{BLUE}"
+        )
+
+    print(
+        "If you want to create a new pull request, here are some links to "
+        f"nicely-formatted PR templates:{ENDCOLOUR}"
+    )
+    info_template = (
+        YELLOW
+        + "  - To create a "
+        + BOLD
+        + "{name}"
+        + ENDCOLOUR
+        + YELLOW
+        + " pull request: "
+        + ENDCOLOUR
+        + "https://github.com/{repo}/compare/main...{remote_branch_name}"
+        "?{params}"
+    )
+
+    for template in templates:
+        query_params = {
+            "quick_pull": 1,
+            "template": template["template"],
+            "labels": "+".join(template["labels"]),
+            "title": template["title_prefix"].rstrip() + " " + last_commit_msg,
+        }
+        line = info_template.format(
+            name=template["name"],
+            repo=repo,
+            remote_branch_name=remote_branch_name,
+            params=urllib.parse.urlencode(query_params),
+        )
+        print(line)
+
+    print()
+
+
+for line in open(0):
+    local_ref, local_sha, remote_ref, remote_sha = line.split()
+    remote_is_main = remote_ref.endswith(main_branch)
+    is_delete = local_sha == z40
+    is_new_branch = remote_sha == z40
+
+    if remote_is_main:
+        check_push_to_main()
+    elif not is_delete:
+        print_pr_links(is_new_branch, local_ref, remote_ref)
