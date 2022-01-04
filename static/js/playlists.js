@@ -6,51 +6,70 @@ const playlistListElem = (data) => {
   const updated = $('<span/>').addClass('playlistLastUpdated');
   updated.text(`last updated ${data.last_updated}`);
   const div = $('<div/>').addClass("playlist").append(name).append(updated)
-  const a = $('<a/>').attr('href', data.url).append(div);
+  const a = $('<a/>').attr('href', detailUrl + data.id).append(div);
   return $('<li/>').append(a);
 };
 
-const fillList = (data) => {
+const fillList = ({data, sortBy, filterBy}) => {
   const list = $('#playlistList')
   list.empty();
-  data.forEach(d => list.append(playlistListElem(d)));
-};
 
-const sortBy = (data, type) => {
-  if (type == 'Default') return data;
-  else if (type == 'Alphabetical') {
-    const sortedData = data.slice();
-    return sortedData.sort((a, b) => a.name < b.name ? -1 : 1);
-  } else {
-    throw new Error('unknown sort type: ' + type);
+  let _data = data.slice()
+
+  if (filterBy && filterBy !== 'ALL') {
+    _data = _data.filter(d => d.status === filterBy);
   }
-};
 
-const filterByStatus = (data, status) => {
-  if (status !== "ALL") data = data.filter(d => d.status == status);
-  fillList(data);
+  if (sortBy) {
+    if (sortBy === 'Default') {
+    } else if (sortBy === 'Alphabetical') {
+      const makeUntitled = name => name || 'Untitled';
+      _data.sort((a, b) => makeUntitled(a.name) < makeUntitled(b.name) ? -1 : 1);
+    } else {
+      throw new Error('unknown sort type: ' + type);
+    }
+  }
+
+  _data.forEach(d => list.append(playlistListElem(d)));
 };
 
 let currentFilter = "ALL";
 let currentSort = "Default";
 
 $(document).ready(() => {
-  const playlists = JSON.parse($('#playlists').text());
+  let playlists;
+  fetch(requestUrl, {
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(response => {
+    return response.json();
+  }).then(playlists => {
+    fillList({
+      data: playlists,
+      filterBy: $('#filter').val(),
+    });
 
-  filterByStatus(sortBy(playlists, $('#sort').val()), $('#filter').val());
-
-  $('#filter').change(function() {
-    const newFilter = $(this).val();
-    if (newFilter === currentFilter) return;
-    currentFilter = newFilter;
-    filterByStatus(sortBy(playlists, currentSort), newFilter);
+    $('#filter').change(function() {
+      const newFilter = $(this).val();
+      if (newFilter === currentFilter) return;
+      currentFilter = newFilter;
+      fillList({
+        data: playlists,
+        filterBy: newFilter,
+      });
+    });
   });
 
   $('#sort').change(function() {
     const newSort = $(this).val();
     if (newSort === currentSort) return;
     currentSort = newSort;
-    filterByStatus(sortBy(playlists, newSort), currentFilter);
+    fillList({
+      data: playlists,
+      filterBy: currentFilter,
+      sortBy: newSort,
+    });
   });
 });
 })();

@@ -1,15 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block css %}
-{% load static %}
 <link rel="stylesheet" href={% static 'css/playlist_detail.css' %}>
+<link rel="stylesheet" href={% static 'css/loader.css' %}>
 {% endblock css %}
 
 {% block scripts %}
 <script src="https://cdn.plot.ly/plotly-2.7.0.min.js"></script>
-{{ features|json_script:"features" }}
-{% load static %}
-<script src="{% static 'js/features.js' %}" type="application/javascript"></script>
+<script src="{% static 'js/playlist_detail.js' %}" type="application/javascript"></script>
+<script type="application/javascript">
+  const playlistUrl = "{{ playlist_url }}";
+  const analysisUrl = "{{ analysis_url }}";
+</script>
 {% endblock scripts %}
 
 {% block content %}
@@ -17,20 +20,16 @@
 <div id="contentContainer">
   <div id="playlistInfo">
     <div id="playlistName">
-      <span>{{ playlist.name }}</span>
+      <span id="playlist">Loading playlist...</span>
     </div>
     <div id="trackContainer">
-      {% for track in playlist.track_set.all %}
-        <p class="trackInfo" id="track{{ track.pk }}">
-          {{ track.name }}
-          <br>
-          {{ track.artists_comma_separated }}
-        </p>
-      {% endfor %}
+      <div class="lds-ripple"><div></div><div></div></div>
     </div>
   </div>
 
-  <div id="spiderPlot"/>
+  <div id="spiderPlot">
+    <div class="lds-ripple"><div></div><div></div></div>
+  </div>
 <div>
 
 {% endblock %}

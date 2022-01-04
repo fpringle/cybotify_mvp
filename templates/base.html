@@ -29,18 +29,18 @@
       {% block menubar %}
         <ul style="list-style-type:none;">
         {% if request.user.is_authenticated %}
-          <li><a href={% url 'index' %}>Home</a></li>
+          <li><a href={% url 'frontend:index' %}>Home</a></li>
           {% if request.user.is_superuser %}
           <li><a href={% url 'admin:index' %}>Admin</a></li>
           {% else %}
-          <li><a href={% url 'playlists' %}>Playlists</a></li>
+          <li><a href={% url 'frontend:playlists' %}>Playlists</a></li>
           {% endif %}
-          <li><a href={% url 'profile' %}>Profile</a></li>
-          <li><a href={% url 'logout' %}>Log out</a></li>
+          <li><a href={% url 'frontend:profile' %}>Profile</a></li>
+          <li><a href={% url 'frontend:logout' %}>Log out</a></li>
         {% else %}
-          <li><a href={% url 'index' %}>Home</a></li>
-          <li><a href={% url 'login' %}>Log in</a></li>
-          <li><a href={% url 'register' %}>Sign up</a></li>
+          <li><a href={% url 'frontend:index' %}>Home</a></li>
+          <li><a href={% url 'frontend:login' %}>Log in</a></li>
+          <li><a href={% url 'frontend:register' %}>Sign up</a></li>
         {% endif %}
         </ul>
       {% endblock menubar %}
