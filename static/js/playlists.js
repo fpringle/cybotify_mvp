@@ -10,25 +10,27 @@ const playlistListElem = (data) => {
   return $('<li/>').append(a);
 };
 
-const fillList = (data) => {
+const fillList = ({data, sortBy, filterBy}) => {
   const list = $('#playlistList')
   list.empty();
-  data.forEach(d => list.append(playlistListElem(d)));
-};
 
-const sortBy = (data, type) => {
-  if (type == 'Default') return data;
-  else if (type == 'Alphabetical') {
-    const sortedData = data.slice();
-    return sortedData.sort((a, b) => a.name < b.name ? -1 : 1);
-  } else {
-    throw new Error('unknown sort type: ' + type);
+  let _data = data.slice()
+
+  if (filterBy && filterBy !== 'ALL') {
+    _data = _data.filter(d => d.status === filterBy);
   }
-};
 
-const filterByStatus = (data, status) => {
-  if (status !== "ALL") data = data.filter(d => d.status == status);
-  fillList(data);
+  if (sortBy) {
+    if (sortBy === 'Default') {
+    } else if (sortBy === 'Alphabetical') {
+      const makeUntitled = name => name || 'Untitled';
+      _data.sort((a, b) => makeUntitled(a.name) < makeUntitled(b.name) ? -1 : 1);
+    } else {
+      throw new Error('unknown sort type: ' + type);
+    }
+  }
+
+  _data.forEach(d => list.append(playlistListElem(d)));
 };
 
 let currentFilter = "ALL";
@@ -42,16 +44,20 @@ $(document).ready(() => {
     }
   }).then(response => {
     return response.json();
-  }).then(response => {
-    playlists = response;
-    console.log(playlists);
-    filterByStatus(playlists, $('#filter').val());
+  }).then(playlists => {
+    fillList({
+      data: playlists,
+      filterBy: $('#filter').val(),
+    });
 
     $('#filter').change(function() {
       const newFilter = $(this).val();
       if (newFilter === currentFilter) return;
       currentFilter = newFilter;
-      filterByStatus(playlists, newFilter);
+      fillList({
+        data: playlists,
+        filterBy: newFilter,
+      });
     });
   });
 
@@ -59,7 +65,11 @@ $(document).ready(() => {
     const newSort = $(this).val();
     if (newSort === currentSort) return;
     currentSort = newSort;
-    filterByStatus(sortBy(playlists, newSort), currentFilter);
+    fillList({
+      data: playlists,
+      filterBy: currentFilter,
+      sortBy: newSort,
+    });
   });
 });
 })();
