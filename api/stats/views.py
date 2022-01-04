@@ -1,6 +1,7 @@
-from django.http import JsonResponse
 from django_pandas.io import read_frame
 from pandas.core.frame import DataFrame
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from api.music.models import TrackFeatures, UserPlaylist
 
@@ -61,6 +62,7 @@ def get_playlist_features_by_spotify_id(spotify_id, fields=None):
     return get_playlist_average_features(playlist, fields)
 
 
+@api_view(["GET"])
 def get_playlist_features(request, playlist_id):
     fields = request.GET.get("fields")
     if fields:
@@ -69,4 +71,4 @@ def get_playlist_features(request, playlist_id):
         fields = ALL_FIELDS[:]
 
     features = get_playlist_features_by_db_id(playlist_id, fields)
-    return JsonResponse(features)
+    return Response(features)
