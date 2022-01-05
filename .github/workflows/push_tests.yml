@@ -35,13 +35,11 @@ jobs:
 
     - name: Create dummy .env file
       run: |
-        echo "SPOTIFY_CLIENT_ID=CLIENT_ID" > cybotify/.env
-        echo "SPOTIFY_CLIENT_SECRET=CLIENT_SECRET" >> cybotify/.env
-        echo "SPOTIFY_REDIRECT_URI=REDIRECT_URI" >> cybotify/.env
+        cp cybotify/.env_sample cybotify/.env
 
     - name: Run Tests
       run: |
-        python3.8 -m coverage run --source='.' --omit="tests/*","*/migrations/*" manage.py test
+        DATABASE_ENGINE=sqlite SQLITE_DATABASE_NAME=:memory: python3.8 -m coverage run --source='.' --omit="tests/*","*/migrations/*" manage.py test
 
     - name: Coverage Badge
       uses: tj-actions/coverage-badge-py@v1.6
