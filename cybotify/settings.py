@@ -10,21 +10,28 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import sys
 from pathlib import Path
+
+import environ
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# load environment variables
+env = environ.Env(
+    DEBUG=(bool, False),
+)
+environ.Env.read_env(BASE_DIR / "cybotify" / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-yiv@xbp!&9#pij+y@s7)+ws)sger^b$n=$k%get9-1buqezd0&"
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DJANGO_DEBUG_MODE")
 
 ALLOWED_HOSTS = ["192.168.0.10", "localhost", "127.0.0.1"]
 
@@ -65,7 +72,7 @@ ROOT_URLCONF = "cybotify.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [BASE_DIR / env("DJANGO_TEMPLATES_DIR")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -84,22 +91,31 @@ WSGI_APPLICATION = "cybotify.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if sys.argv[1] == "test":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "test_db.sqlite",
-        }
-    }
-else:
+_DATABASE_ENGINE = env("DATABASE_ENGINE")
+
+if _DATABASE_ENGINE == "postgres":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "cybotify",
-            "USER": "cybotify",
-            "PASSWORD": "cybotify",
+            "NAME": env("POSTGRES_DATABASE_NAME"),
+            "USER": env("POSTGRES_DATABASE_USER"),
+            "PASSWORD": env("POSTGRES_DATABASE_PASSWORD"),
         }
     }
+elif _DATABASE_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": env("SQLITE_DATABASE_NAME"),
+        }
+    }
+else:
+    raise ImproperlyConfigured(
+        f"Unsupported engine specified in the .env file: '{_DATABASE_ENGINE}'\n"
+        "Check the DATABASE_ENGINE variable. Currently supported engines:\n"
+        "   postgres\n"
+        "   sqlite"
+    )
 
 
 # Password validation
@@ -131,9 +147,9 @@ LOGIN_URL = "/accounts/login/"
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-en"
+LANGUAGE_CODE = env("DJANGO_LANGUAGE")
 
-TIME_ZONE = "UTC"
+TIME_ZONE = env("DJANGO_TIMEZONE")
 
 USE_I18N = True
 
@@ -145,8 +161,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_URL = env("DJANGO_STATIC_URL")
+STATICFILES_DIRS = [BASE_DIR / env("DJANGO_STATIC_DIR")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -169,3 +185,17 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+# REST Framework
+
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES = [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ]
+else:
+    DEFAULT_RENDERER_CLASSES = [
+        "rest_framework.renderers.JSONRenderer",
+    ]
+
+REST_FRAMEWORK = {"DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES}

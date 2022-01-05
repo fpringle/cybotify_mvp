@@ -24,7 +24,8 @@ class PlaylistViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request, format=None):
         su = request.user.spotifyuser
         su.update_playlists()
-        playlists = su.userplaylist_set.all().order_by("name")
+        ordering = "spotifyuserplaylistrelationship__playlist_position"
+        playlists = su.userplaylist_set.all().order_by(ordering)
         serializer = PlaylistSerializer(playlists, many=True)
         return Response(serializer.data)
 

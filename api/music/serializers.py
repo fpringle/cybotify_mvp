@@ -61,7 +61,14 @@ class PlaylistDetailSerializer(serializers.ModelSerializer):
             "tracks",
         ]
 
-    tracks = TrackSerializer(source="track_set", many=True, read_only=True)
+    tracks = serializers.SerializerMethodField()
+
+    def get_tracks(self, obj):
+        playlist_tracks = obj.track_set.order_by(
+            "playlisttrackrelationship__track_position"
+        )
+        playlist_tracks = TrackSerializer(playlist_tracks, many=True, read_only=True)
+        return playlist_tracks.data
 
 
 class PlaylistFeaturesSerializer(serializers.ModelSerializer):
@@ -77,4 +84,13 @@ class PlaylistFeaturesSerializer(serializers.ModelSerializer):
             "tracks",
         ]
 
-    tracks = TrackWithFeaturesSerializer(source="track_set", many=True, read_only=True)
+    tracks = serializers.SerializerMethodField()
+
+    def get_tracks(self, obj):
+        playlist_tracks = obj.track_set.order_by(
+            "playlisttrackrelationship__track_position"
+        )
+        playlist_tracks = TrackWithFeaturesSerializer(
+            playlist_tracks, many=True, read_only=True
+        )
+        return playlist_tracks.data
