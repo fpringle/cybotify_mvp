@@ -94,19 +94,8 @@ const fillList = (indices) => {
   }
 };
 
-const search = (data, text) => {
-  text = text.toLowerCase();
-  const name = data.name.toLowerCase();
-  const artists = data.artists.join(',').toLowerCase();
-  const isIn = (word, sentence) => sentence.indexOf(word) !== -1;
-  return isIn(text, name) || isIn(text, artists);
-};
-
 const filter = (text) => {
-  return fuse.search(text).map(result => result.refIndex);
-  const withIdx = track_data.map((e, i) => [e, i]);
-  const filtered = text ? withIdx.filter(([td, idx]) => search(td, text)) : withIdx;
-  return filtered.map(([td, idx]) => idx);
+  return text ? fuse.search(text).map(result => result.refIndex) : track_data.map((e,i) => i);
 };
 
 const updateFilter = (searchBox) => {
@@ -153,6 +142,7 @@ $(document).ready(() => {
 
   Promise.all([getPlaylistFeatures, getTrackInfo]).then(() => {
     linkHover();
+    updateFilter(searchBox);
   });
 
   const searchBox = $('#searchBoxInput');
@@ -161,7 +151,6 @@ $(document).ready(() => {
   });
 
   searchBox.focus();
-  updateFilter(searchBox);
 });
 
 })();
