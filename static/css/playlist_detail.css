@@ -84,6 +84,7 @@ body {
   color: white;
   caret-color: transparent;
   border-width: 0px;
+  opacity: 40%;
 }
 
 #searchBoxInput::selection {
@@ -93,4 +94,18 @@ body {
 #searchBoxInput:focus {
   border-width: 0px;
   outline: none;
+}
+
+#clearSearchInput {
+  color: white;
+  opacity: 40%;
+  height: 15px;
+  width: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#clearSearchInput:hover {
+  opacity: 100%;
 }

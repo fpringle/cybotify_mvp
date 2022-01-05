@@ -147,9 +147,18 @@ $(document).ready(() => {
 
   const searchBox = $('#searchBoxInput');
   document.getElementById('searchBoxInput').addEventListener('input', event => {
+    if (searchBox.val() == '') $('#clearSearchInput').hide();
+    else $('#clearSearchInput').show();
     updateFilter(searchBox);
   });
 
+  $('#clearSearchInput').click(() => {
+    searchBox.val('');
+    $('#clearSearchInput').hide();
+    updateFilter(searchBox);
+  });
+
+  $('#clearSearchInput').hide();
   searchBox.focus();
 });
 
