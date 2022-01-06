@@ -37,6 +37,7 @@ class SpotifyUserAdmin(admin.ModelAdmin):
     model = SpotifyUser
     fields = ("user", "spotify_id", "_playlists")
     readonly_fields = ("_playlists",)
+    search_fields = ("user__username", "spotify_id")
 
     @admin.display(description="Playlists")
     def _playlists(self, obj):

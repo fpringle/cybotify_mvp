@@ -24,6 +24,7 @@ class TrackAdmin(admin.ModelAdmin):
     fieldsets = [
         ("Track info", {"fields": ["spotify_id", "name", "artist_list", "album"]}),
     ]
+    search_fields = ("spotify_id", "name", "artists", "album")
     inlines = [TrackFeaturesInlineAdmin]
 
     @admin.display(description="Artists")
@@ -50,6 +51,7 @@ class UserPlaylistAdmin(admin.ModelAdmin):
         "owner",
     )
     readonly_fields = ("tracks", "last_updated", "_users")
+    search_fields = ("spotify_id", "snapshot_id", "name", "owner")
 
     def tracks(self, obj):
         list_items = format_html_join(
