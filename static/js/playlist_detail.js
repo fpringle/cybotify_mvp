@@ -159,7 +159,7 @@ $(document).ready(() => {
   });
 
   $('#clearSearchInput').hide();
-  searchBox.focus();
+  //searchBox.focus();
 });
 
 })();
