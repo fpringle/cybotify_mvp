@@ -18,11 +18,16 @@ sqlite set up" instrctions. Once you've set up the DB, follow the "django set up
 instructions.
 
 
-
 ### PostgreSQL set up
+
 1. install PostgreSQL
+
     ```bash
         sudo apt install postgresql
+    ```
+    OR for Mac
+    ```bash
+        brew install postgresql
     ```
 2. run psql as postgres
     ```bash
@@ -33,6 +38,10 @@ instructions.
     ```bash
         sudo su postgres
         psql
+    ```
+    OR for Mac
+    ```bash
+        psql -d postgres
     ```
 
 3. create cybotify user
@@ -52,7 +61,11 @@ instructions.
         \q
     ```
 
-5. open /etc/postgresql/12/main/pg_hba.conf and change "peer" to "md5" on this line:
+5. open pg_hba.conf at one of
+    - /etc/postgresql/12/main/pg_hba.conf
+    - /usr/local/var/postgres/pg_hba.conf
+
+    and change "peer"/"trust" to "md5" on this line:
     ```
         # "local" is for Unix domain socket connections only
         local   all             all                                     peer    <--- change to md5
@@ -114,7 +127,7 @@ instructions.
         SPOTIFY_CLIENT_SECRET=CLIENT_SECRET_HERE
         SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/api/accounts/new/callback    # leave this
     ```
-    
+
     If you're using postgres:
     ```
     # cybotify.env
@@ -123,7 +136,7 @@ instructions.
     POSTGRES_DATABASE_USER=cybotify       # or whatever you chose during postgres setup
     POSTGRES_DATABASE_PASSWORD=cybotify   # or whatever you chose during postgres setup
     ```
-    
+
     If you're using sqlite:
     ```
     # cybotify.env
