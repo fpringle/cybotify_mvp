@@ -37,6 +37,7 @@ instructions.
 
 3. create cybotify user
     ```psql
+        # you can change the postgres username and password but you'll have to update cybotify/.env (see below)
         CREATE USER cybotify PASSWORD 'cybotify';
         ALTER ROLE cybotify SET client_encoding TO 'utf8';
         ALTER ROLE cybotify SET default_transaction_isolation TO 'read committed';
@@ -45,6 +46,7 @@ instructions.
 
 4. create cybotify database and grant permissions
     ```psql
+        # you can change the name of the database but you'll have to update cybotify/.env (see below)
         CREATE DATABASE cybotify OWNER cybotify;
         GRANT ALL ON DATABASE cybotify TO cybotify;
         \q
@@ -110,12 +112,28 @@ instructions.
         # cybotify.env
         SPOTIFY_CLIENT_ID=CLIENT_ID_HERE
         SPOTIFY_CLIENT_SECRET=CLIENT_SECRET_HERE
-        SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/accounts/new/callback    # leave this
+        SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/api/accounts/new/callback    # leave this
+    ```
+    
+    If you're using postgres:
+    ```
+    # cybotify.env
+    DATABASE_ENGINE=postgres
+    POSTGRES_DATABASE_NAME=cybotify       # or whatever you chose during postgres setup
+    POSTGRES_DATABASE_USER=cybotify       # or whatever you chose during postgres setup
+    POSTGRES_DATABASE_PASSWORD=cybotify   # or whatever you chose during postgres setup
+    ```
+    
+    If you're using sqlite:
+    ```
+    # cybotify.env
+    DATABASE_ENGINE=sqlite
+    SQLITE_DATABASE_NAME=cybotify.sqlite  # or whatever you want
     ```
 
-6. set your app's redirect URI to http://127.0.0.1:8000/accounts/new/callback in the spotify dashboard
+6. set your app's redirect URI to http://127.0.0.1:8000/api/accounts/new/callback in the spotify dashboard
 
-6. run server
+7. run server
     ```
         ./manage.py runserver
     ```
