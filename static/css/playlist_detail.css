@@ -37,7 +37,6 @@ body {
   align-items: center;
   font-size: 30px;
   /*border-bottom: 2px solid black;*/
-  margin-bottom: 10px;
 }
 
 .trackInfo {
@@ -72,4 +71,48 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#searchBox {
+  display: flex;
+  justify-content: center;
+}
+
+#searchBoxInput {
+  background-color: #383838;
+  color: white;
+/*  caret-color: transparent;*/
+  border-width: 0px;
+  opacity: 40%;
+}
+
+#searchBoxInput::selection {
+  background-color: black;
+}
+
+#searchBoxInput:focus {
+  border-width: 0px;
+  outline: none;
+  opacity: 80%;
+}
+
+#clearSearchInput {
+  color: white;
+  opacity: 40%;
+  height: 15px;
+  width: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#clearSearchInput:hover {
+  opacity: 100%;
+}
+
+#searchContainer {
+  display: flex;
+  border: 1px solid #6c6c6c;
+  padding: 3px;
+  width: 34%;
 }

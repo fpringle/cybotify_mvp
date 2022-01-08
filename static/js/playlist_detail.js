@@ -51,15 +51,57 @@ const setName = (name) => {
 
 let playlist_features;
 let track_features;
+let track_elements;
+let track_data;
+let fuse;
 
-const fillList = (trackData) => {
-  $('#trackContainer').empty();
+const makeElements = (trackData) => {
+  track_elements = [];
   trackData.forEach(track => {
     const artists = track.artists.join(', ');
     const p = $('<p/>').addClass('trackInfo').html(`${track.name}<br>${artists}`);
     p.attr('id', 'track' + track.id);
-    $('#trackContainer').append(p);
+    track_elements.push(p);
   });
+};
+
+const linkHover = () => {
+  track_features.forEach(track => {
+    const id = track.id;
+    const elem = $('#track' + id);
+    if (elem.length === 0) return;
+
+    const hoverOn = (e) => {
+      plotSpider(playlist_features, track);
+    };
+    const hoverOff = (e) => {
+      plotSpider(playlist_features);
+    };
+    elem.hover(hoverOn, hoverOff);
+  });
+};
+
+const fillList = (indices) => {
+  $('#trackContainer').empty();
+  if (!indices) {
+    track_elements.forEach(elem => {
+      $('#trackContainer').append(elem);
+    });
+  } else {
+    indices.forEach(idx => {
+      $('#trackContainer').append(track_elements[idx]);
+    });
+  }
+};
+
+const filter = (text) => {
+  return text ? fuse.search(text).map(result => result.refIndex) : track_data.map((e,i) => i);
+};
+
+const updateFilter = (searchBox) => {
+  const curVal = searchBox.val();
+  fillList(filter(curVal));
+  linkHover();
 };
 
 $(document).ready(() => {
@@ -71,7 +113,17 @@ $(document).ready(() => {
     return response.json();
   }).then(playlist => {
     setName(playlist.name);
-    fillList(playlist.tracks);
+    makeElements(playlist.tracks);
+    track_data = playlist.tracks;
+    fuse = new Fuse(track_data, {
+      threshold: 0.4,
+      keys: [
+        'name',
+        'artists',
+//        'album',
+      ],
+    });
+    fillList();
   });
 
   const getTrackInfo = fetch(analysisUrl, {
@@ -89,18 +141,25 @@ $(document).ready(() => {
   });
 
   Promise.all([getPlaylistFeatures, getTrackInfo]).then(() => {
-    track_features.forEach(track => {
-      const id = track.id;
-      const elem = $('#track' + id);
-      const hoverOn = (e) => {
-        plotSpider(playlist_features, track);
-      };
-      const hoverOff = (e) => {
-        plotSpider(playlist_features);
-      };
-      elem.hover(hoverOn, hoverOff);
-    });
+    linkHover();
+    updateFilter(searchBox);
   });
+
+  const searchBox = $('#searchBoxInput');
+  document.getElementById('searchBoxInput').addEventListener('input', event => {
+    if (searchBox.val() == '') $('#clearSearchInput').hide();
+    else $('#clearSearchInput').show();
+    updateFilter(searchBox);
+  });
+
+  $('#clearSearchInput').click(() => {
+    searchBox.val('');
+    $('#clearSearchInput').hide();
+    updateFilter(searchBox);
+  });
+
+  $('#clearSearchInput').hide();
+  //searchBox.focus();
 });
 
 })();
