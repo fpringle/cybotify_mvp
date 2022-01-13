@@ -111,6 +111,9 @@ class UserPlaylist(models.Model):
         if not needs_update:
             print("  Already up to date")
             return
+
+        # TODO update the info about the playlist itself
+        #  e.g. name, status, owner
         print(
             f"Playlist {self.name} - checking for updates "
             f"(DB snapshot ID {self.snapshot_id})"

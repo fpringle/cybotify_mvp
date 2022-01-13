@@ -41,17 +41,22 @@ class TrackInlineAdmin(admin.TabularInline):
 
 class UserPlaylistAdmin(admin.ModelAdmin):
     model = UserPlaylist
-    fields = (
+    readonly_fields = fields = (
         "spotify_id",
         "snapshot_id",
         "name",
         "_users",
-        "tracks",
         "last_updated",
         "owner",
+        "tracks",
     )
-    readonly_fields = ("tracks", "last_updated", "_users")
     search_fields = ("spotify_id", "snapshot_id", "name", "owner")
+    actions = ["update_playlists"]
+
+    @admin.action(description="Update selected playlists' information")
+    def update_playlists(self, request, queryset):
+        for playlist in queryset:
+            playlist.check_update(False)
 
     def tracks(self, obj):
         list_items = format_html_join(

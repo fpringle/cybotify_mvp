@@ -13,12 +13,11 @@ logger = logging.getLogger("admin")
 
 class SpotifyUserInlineAdmin(admin.StackedInline):
     model = SpotifyUser
-    fields = [
+    readonly_fields = fields = [
         "user",
         "user_link",
     ]
     list_display = ["user_link"]
-    readonly_fields = ("user_link",)
 
     def user_link(self, obj):
         if not obj.user:
@@ -35,8 +34,7 @@ class SpotifyUserInlineAdmin(admin.StackedInline):
 
 class SpotifyUserAdmin(admin.ModelAdmin):
     model = SpotifyUser
-    fields = ("user", "spotify_id", "_playlists")
-    readonly_fields = ("_playlists",)
+    readonly_fields = fields = ("user", "spotify_id", "_playlists")
     search_fields = ("user__username", "spotify_id")
 
     @admin.display(description="Playlists")
@@ -59,8 +57,12 @@ class SpotifyUserAdmin(admin.ModelAdmin):
 
 class SpotifyUserCredentialsAdmin(admin.StackedInline):
     model = SpotifyUserCredentials
-    fields = ["access_token", "refresh_token", "has_expired", "expires_at"]
-    readonly_fields = ["has_expired", "expires_at"]
+    readonly_fields = fields = [
+        "access_token",
+        "refresh_token",
+        "has_expired",
+        "expires_at",
+    ]
 
     def has_expired(self, obj):
         return obj.has_expired
