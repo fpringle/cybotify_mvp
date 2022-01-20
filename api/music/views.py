@@ -35,7 +35,7 @@ class PlaylistViewSet(viewsets.ReadOnlyModelViewSet):
         except UserPlaylist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        playlist.update_tracks(False)
+        playlist.check_update(False)
         serializer = PlaylistDetailSerializer(playlist)
         return Response(serializer.data)
 
@@ -55,7 +55,7 @@ class PlaylistFeaturesViewSet(viewsets.ReadOnlyModelViewSet):
         except UserPlaylist.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        playlist.update_tracks(True)
+        playlist.check_update(True)
         serializer = PlaylistFeaturesSerializer(playlist)
         return Response(serializer.data)
 

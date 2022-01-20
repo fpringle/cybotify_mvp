@@ -1,7 +1,11 @@
+import logging
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from api.accounts import SpotifyManager
+
+logger = logging.getLogger(__name__)
 
 
 class UserPlaylistManager(models.Manager):
@@ -77,6 +81,20 @@ class UserPlaylist(models.Model):
         current = self.get_latest_snapshot()
         return (current != self.snapshot_id, current)
 
+    def update_info(self):
+        sp = self.get_client()
+        info = sp.playlist(
+            self.spotify_id, fields="name,owner(id),collaborative,public"
+        )
+        name = info["name"]
+        status = SpotifyManager.get_playlist_status(info)
+        owner = info["owner"]["id"]
+        if self.name != name or self.status != status or self.owner != owner:
+            self.name = name
+            self.status = status
+            self.owner = owner
+            self.save()
+
     def update_tracks(self, get_features=True):
         sp = self.get_client()
         tracks = SpotifyManager.get_playlist_tracks(sp, self.spotify_id)
@@ -107,19 +125,15 @@ class UserPlaylist(models.Model):
             self.update_track_features()
 
     def check_update(self, get_features=True):
+        logger.info(f"Checking if playlist {self.id} needs to be updated")
         needs_update, current = self.needs_update()
         if not needs_update:
-            print("  Already up to date")
+            logger.info(f"Playlist {self.id} is up to date")
             return
 
-        # TODO update the info about the playlist itself
-        #  e.g. name, status, owner
-        print(
-            f"Playlist {self.name} - checking for updates "
-            f"(DB snapshot ID {self.snapshot_id})"
-        )
-        print(f"  Spotify latest snapshot id is {current}, updating")
+        logger.info(f"Playlist {self.id} is outdated, updating")
 
+        self.update_info()
         self.update_tracks(get_features)
         self.snapshot_id = current
 
@@ -188,7 +202,8 @@ class Track(models.Model):
             return
         if self.features_unavailable:
             return
-        print(f"getting features for track '{self.name}'")
+
+        logger.info(f"getting features for track {self.id}")
         track_features_data = SpotifyManager.get_track_features([self.spotify_id])[0]
         self.track_features = TrackFeatures(
             track=self,
