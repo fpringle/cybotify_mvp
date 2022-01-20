@@ -90,7 +90,7 @@ def handle_spotify_auth_response(request):
     user_info = SpotifyManager.user_client(access_token).current_user()
 
     spotify_id = user_info["id"]
-    print("spotify id:", spotify_id)
+    logger.info("Spotify ID: %s", spotify_id)
 
     if SpotifyUser.objects.filter(spotify_id=spotify_id).exists():
         # user already exists
@@ -109,7 +109,6 @@ def handle_spotify_auth_response(request):
     if reg.user:
         user = reg.user
     else:
-        print("create new user")
         user = User.objects.create_user(username=spotify_id, email=email)
         user.first_name = first_name
         user.last_name = last_name
@@ -142,7 +141,6 @@ def logout(request):
 
 @api_view(["POST"])
 def create_password(request):
-    print("post create pass")
     user_id = request.user.pk
     user = User.objects.filter(pk=user_id).get()
 
