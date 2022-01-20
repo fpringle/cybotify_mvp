@@ -35,7 +35,7 @@ ALL_FIELDS = FLOAT_FIELDS + INTEGER_FIELDS + ENUM_FIELDS
 def get_playlist_features_df(playlist) -> DataFrame:
     playlist.update_tracks()
     qs = TrackFeatures.objects.filter(track__playlist=playlist)
-    return read_frame(qs).drop("id").rename(columns={"track": "id"})
+    return read_frame(qs).drop("id", axis=1).rename(columns={"track": "id"})
 
 
 def get_playlist_average_features(playlist, fields=None):
