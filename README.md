@@ -71,6 +71,11 @@ instructions.
         local   all             all                                     peer    <--- change to md5
     ```
 
+6. restart postgresql daemn
+    ```bash
+        sudo service postgresql restart
+    ```
+
 ### Alternate sqlite set up
 
 1. change django backend for postgresql to sqlite

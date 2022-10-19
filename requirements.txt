@@ -4,3 +4,4 @@ django-extensions
 django-pandas
 djangorestframework
 psycopg2
+requests
